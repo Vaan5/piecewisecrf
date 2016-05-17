@@ -61,6 +61,9 @@ def prepare_dataset(name):
         labels_pairwise_surrounding = label_gen.generate_pairwise_labels(labels,
                                                                          label_gen.get_indices_surrounding,
                                                                          FLAGS.num_classes)
+        labels_pairwise_above_below = label_gen.generate_pairwise_labels(labels,
+                                                                         label_gen.get_indices_above_below,
+                                                                         FLAGS.num_classes)
 
         rows = rgb.shape[0]
         cols = rgb.shape[1]
@@ -72,6 +75,7 @@ def prepare_dataset(name):
         rgb_raw = rgb.tostring()
         labels_raw = labels.tostring()
         labels_pairwise_surrounding_raw = labels_pairwise_surrounding.tostring()
+        labels_pairwise_above_below_raw = labels_pairwise_above_below.tostring()
         example = tf.train.Example(features=tf.train.Features(feature={
             'height': _int64_feature(rows),
             'width': _int64_feature(cols),
@@ -79,7 +83,8 @@ def prepare_dataset(name):
             'img_name': _bytes_feature(img_prefix.encode()),
             'rgb': _bytes_feature(rgb_raw),
             'labels_unary': _bytes_feature(labels_raw),
-            'labels_binary_surrounding': _bytes_feature(labels_pairwise_surrounding_raw)}))
+            'labels_binary_surrounding': _bytes_feature(labels_pairwise_surrounding_raw),
+            'labels_binary_above_below': _bytes_feature(labels_pairwise_above_below_raw)}))
         writer.write(example.SerializeToString())
         writer.close()
 

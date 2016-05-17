@@ -29,7 +29,7 @@ def draw_prediction(y, dataset, output_dir, img_name):
     skimage.io.imsave(os.path.join(os.path.join(output_dir, 'ppm'), "{}.ppm".format(img_name)), yimg)
 
 
-def save_predictions(sess, image, dataset, partition, logits_unary, logits_pairwise, output_dir):
+def save_predictions(sess, image, dataset, partition, logits_unary, logits_pairwise, logits_ab_pairwise, output_dir):
     width = FLAGS.img_width
     height = FLAGS.img_height
     image_list = dataset.get_filenames(partition=partition)
@@ -43,11 +43,15 @@ def save_predictions(sess, image, dataset, partition, logits_unary, logits_pairw
             img[:, :, c] /= img[:, :, c].std()
 
     img_data = img.reshape(1, height, width, 3)
-    out_unary, out_pairwise = sess.run([logits_unary, logits_pairwise], feed_dict={image: img_data})
+    out_unary, out_pairwise, out_ab_pairwise = sess.run([logits_unary, logits_pairwise, logits_ab_pairwise], feed_dict={image: img_data})
 
     s = mean_field.mean_field(out_unary[0, :, :, :],
                               [(out_pairwise[0, :, :, :],
                                list(zip(indices.FIRST_INDICES_SURR, indices.SECOND_INDICES_SURR)),
+                               indices.generate_encoding_decoding_dict(out_unary.shape[3])[1]
+                                ),
+                               (out_ab_pairwise[0, :, :, :],
+                               list(zip(indices.FIRST_INDICES_AB, indices.SECOND_INDICES_AB)),
                                indices.generate_encoding_decoding_dict(out_unary.shape[3])[1]
                                 )])
     id_img = s.argmax(2).astype(np.int32, copy=False)
@@ -101,11 +105,11 @@ def main(argv=None):
         # Restores from checkpoint
         with tf.Session() as sess:
             with tf.variable_scope("model"):
-                unary_log, pairwise_log = model.inference(image, FLAGS.batch_size, is_training=False)
+                unary_log, pairwise_log, pairwise_ab_log = model.inference(image, FLAGS.batch_size, is_training=False)
 
             saver = tf.train.Saver()
             saver.restore(sess, args.model_checkpoint_path)
-            save_predictions(sess, image, dataset, args.dataset_partition, unary_log, pairwise_log, args.output_dir)
+            save_predictions(sess, image, dataset, args.dataset_partition, unary_log, pairwise_log, pairwise_ab_log, args.output_dir)
 
 
 if __name__ == '__main__':

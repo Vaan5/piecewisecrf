@@ -216,10 +216,28 @@ def inference(inputs, batch_size, is_training=True):
             pairwise_surr_map = convolve(pairwise_surr_map, FLAGS.num_classes * FLAGS.num_classes, 1,
                                          'pairwise_surr_2', activation=None)
 
-    return unary, pairwise_surr_map
+            # Pairwise-Net - above/below neighbourhood
+            # reshape the featmap tensor
+            pairwise_above_below = tf.transpose(featmap, perm=[1, 2, 3, 0])
+            pairwise_above_below = tf.reshape(pairwise_above_below, shape=[-1, conv6_sz, batch_size])
+            first_indices = tf.gather(pairwise_above_below, indices.FIRST_INDICES_AB)
+            second_indices = tf.gather(pairwise_above_below, indices.SECOND_INDICES_AB)
+            pairwise_above_below_map = tf.concat(1, [first_indices, second_indices])
+
+            # try without this reshaping + transposing
+            pairwise_above_below_map = tf.reshape(pairwise_above_below_map,
+                                           shape=[indices.NUMBER_OF_NEIGHBOURS_AB, -1, 2 * conv6_sz, batch_size])
+            pairwise_above_below_map = tf.transpose(pairwise_above_below_map, perm=[3, 0, 1, 2])
+
+            # apply convolution layers
+            pairwise_above_below_map = convolve(pairwise_above_below_map, unary_pairwise_size, 1, 'pairwise_above_below_1')
+            pairwise_above_below_map = convolve(pairwise_above_below_map, FLAGS.num_classes * FLAGS.num_classes, 1,
+                                         'pairwise_above_below_2', activation=None)
+
+    return unary, pairwise_surr_map, pairwise_above_below_map
 
 
-def loss(out_unary, out_binary, labels_unary, labels_binary, batch_size, is_training=True):
+def loss(out_unary, out_binary, out_binary_ab, labels_unary, labels_binary, labels_binary_ab, batch_size, is_training=True):
     '''
     L2 regularized negative log likelihood
 
@@ -231,11 +249,17 @@ def loss(out_unary, out_binary, labels_unary, labels_binary, batch_size, is_trai
     out_binary: tensor
         Pairwise (surrounding neighbourhood) scores
 
+    out_binary_ab: tensor
+        Pairwise (above/below neighbourhood) scores
+
     labels_unary: bool
         Unary labels
 
     labels_binary: tensor
-        Binary labels
+        Binary labels for surrounding neighbourhood
+
+    labels_binary_ab: tensor
+        Binary labels for above/below neighbourhood
 
     batch_size: int
         Batch size
@@ -250,7 +274,9 @@ def loss(out_unary, out_binary, labels_unary, labels_binary, batch_size, is_trai
 
 
     '''
-    loss_val = losses.neg_log_likelihood(out_unary, out_binary, labels_unary, labels_binary, batch_size)
+    loss_val = losses.neg_log_likelihood(out_unary, out_binary, out_binary_ab,
+                                         labels_unary, labels_binary, labels_binary_ab,
+                                         batch_size)
     all_losses = [loss_val]
     total_loss = losses.total_loss_sum(all_losses)
 
