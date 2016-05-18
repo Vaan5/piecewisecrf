@@ -68,7 +68,7 @@ def total_loss_sum(losses):
     return total_loss
 
 
-def neg_log_likelihood(out_unary, out_binary, labels_unary, labels_binary, batch_size):
+def neg_log_likelihood(out_unary, labels_unary, labels_binary, batch_size):
     '''
 
     Negative log likelihood
@@ -102,23 +102,23 @@ def neg_log_likelihood(out_unary, out_binary, labels_unary, labels_binary, batch
                     FLAGS.subsample_factor // FLAGS.subsample_factor)
     num_neighbours = batch_size * indices.NUMBER_OF_NEIGHBOURS_SURR
 
-    with tf.op_scope([out_unary, out_binary, labels_unary, labels_binary], None, 'NegativeLogLikelyhood'):
+    with tf.op_scope([out_unary, labels_unary, labels_binary], None, 'NegativeLogLikelyhood'):
         one_hot_labels_unary = tf.one_hot(tf.to_int64(labels_unary), FLAGS.num_classes, 1, 0)
         one_hot_labels_unary = tf.reshape(one_hot_labels_unary, [num_examples, FLAGS.num_classes])
-        one_hot_labels_binary = tf.one_hot(tf.to_int64(labels_binary), FLAGS.num_classes * FLAGS.num_classes, 1, 0)
-        one_hot_labels_binary = tf.reshape(one_hot_labels_binary, [num_neighbours,
-                                           FLAGS.num_classes * FLAGS.num_classes])
+        #one_hot_labels_binary = tf.one_hot(tf.to_int64(labels_binary), FLAGS.num_classes * FLAGS.num_classes, 1, 0)
+        #one_hot_labels_binary = tf.reshape(one_hot_labels_binary, [num_neighbours,
+        #                                   FLAGS.num_classes * FLAGS.num_classes])
 
         out_unary_1d = tf.reshape(out_unary, [num_examples, FLAGS.num_classes])
-        out_binary_1d = tf.reshape(out_binary, [num_neighbours, FLAGS.num_classes * FLAGS.num_classes])
+        #out_binary_1d = tf.reshape(out_binary, [num_neighbours, FLAGS.num_classes * FLAGS.num_classes])
 
         log_softmax_unary = tf.log(tf.clip_by_value(tf.nn.softmax(out_unary_1d), 1.0e-6, 1.0))
-        log_softmax_binary = tf.log(tf.clip_by_value(tf.nn.softmax(out_binary_1d), 1.0e-6, 1.0))
+        #log_softmax_binary = tf.log(tf.clip_by_value(tf.nn.softmax(out_binary_1d), 1.0e-6, 1.0))
 
         pu = tf.mul(tf.to_float(one_hot_labels_unary), log_softmax_unary)
-        pb = tf.mul(tf.to_float(one_hot_labels_binary), log_softmax_binary)
+        #pb = tf.mul(tf.to_float(one_hot_labels_binary), log_softmax_binary)
 
-        loss_val = tf.reduce_sum(-pu) + tf.reduce_sum(-pb)
+        loss_val = tf.reduce_sum(-pu)# + tf.reduce_sum(-pb)
 
         tf.add_to_collection(slim.losses.LOSSES_COLLECTION, loss_val)
         return loss_val

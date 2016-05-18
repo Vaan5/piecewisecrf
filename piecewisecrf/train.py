@@ -17,7 +17,7 @@ import piecewisecrf.datasets.helpers.pairwise_label_generator as indices
 FLAGS = prefs.flags.FLAGS
 
 
-def evaluate(sess, unary, pairwise, loss, labels_unary, dataset, dataset_partition='validation'):
+def evaluate(sess, unary, loss, labels_unary, dataset, dataset_partition='validation'):
     '''
 
     Evaluate trained model on the validation dataset
@@ -68,17 +68,19 @@ def evaluate(sess, unary, pairwise, loss, labels_unary, dataset, dataset_partiti
     loss_avg = 0.0
 
     for step in trange(int((dataset.num_examples(dataset_partition) / FLAGS.batch_size))):
-        scores_unary, scores_pairwise, loss_val, yt_unary = sess.run([unary, pairwise, loss, labels_unary])
+        scores_unary, loss_val, yt_unary = sess.run([unary, loss, labels_unary])
         for batch in range(FLAGS.batch_size):
-            s = mean_field.mean_field(scores_unary[batch, :, :, :],
-                                      [(scores_pairwise[batch, :, :, :],
-                                       list(zip(indices.FIRST_INDICES_SURR, indices.SECOND_INDICES_SURR)),
-                                       indices.generate_encoding_decoding_dict(scores_unary.shape[3])[1]
-                                        )])
+            s = scores_unary[batch, :, :, :]
+            #s = mean_field.mean_field(scores_unary[batch, :, :, :],
+            #                          [(scores_pairwise[batch, :, :, :],
+            #                           list(zip(indices.FIRST_INDICES_SURR, indices.SECOND_INDICES_SURR)),
+            #                           indices.generate_encoding_decoding_dict(scores_unary.shape[3])[1]
+            #                            )])
             label_map = s.argmax(2).astype(np.int32, copy=False)
             eval_helper.confusion_matrix(label_map.reshape(-1),
                                          yt_unary[batch], conf_mat,
                                          dataset.num_classes())
+            print(loss_val, dataset.num_examples(dataset_partition))
             loss_avg += loss_val
     print("Total score")
 
@@ -147,21 +149,21 @@ def train(dataset, resume_path=None):
         # Build a Graph that computes the logits predictions from the
         # inference model.
         with tf.variable_scope('model'):
-            unary_log, pairwise_log = model.inference(image, FLAGS.batch_size)
+            unary_log = model.inference(image, FLAGS.batch_size)
             # Calculate loss.
-            loss = model.loss(unary_log, pairwise_log, labels_unary, labels_bin_sur, FLAGS.batch_size)
+            loss = model.loss(unary_log, labels_unary, labels_bin_sur, FLAGS.batch_size)
 
         with tf.variable_scope('model', reuse=True):
-            unary_log_val, pairwise_log_val = model.inference(image_val, FLAGS.batch_size, is_training=False)
+            unary_log_val = model.inference(image_val, FLAGS.batch_size, is_training=False)
             # Calculate loss.
-            loss_val = model.loss(unary_log_val, pairwise_log_val, labels_unary_val,
+            loss_val = model.loss(unary_log_val, labels_unary_val,
                                   labels_bin_sur_val, FLAGS.batch_size, is_training=False)
 
         # used for validating performance on train set
         with tf.variable_scope('model', reuse=True):
-            unary_log_train, pairwise_log_train = model.inference(image_train, FLAGS.batch_size, is_training=False)
+            unary_log_train = model.inference(image_train, FLAGS.batch_size, is_training=False)
             # Calculate loss.
-            loss_train = model.loss(unary_log_train, pairwise_log_train, labels_unary_train,
+            loss_train = model.loss(unary_log_train, labels_unary_train,
                                   labels_bin_sur_train, FLAGS.batch_size, is_training=False)
 
         # Add a summary to track the learning rate.
@@ -229,22 +231,22 @@ def train(dataset, resume_path=None):
                 start_time = time.time()
                 if step % 100 == 0:
                     ret_val = sess.run([train_op, loss, loss_avg_train, unary_log,
-                                        pairwise_log, labels_unary, labels_bin_sur, lr, img_name,
+                                        labels_unary, labels_bin_sur, lr, img_name,
                                         global_step, summary_op])
                     # unpack returned values
                     (_, loss_value, train_loss_avg, scores_unary,
-                        scores_pairwise_surr, yt_unary, yt_pairwise_surr,
+                        yt_unary, yt_pairwise_surr,
                         clr, filename, global_step_value, summary_str) = ret_val
 
                     summary_writer.add_summary(summary_str, global_step_value)
                 else:
                     ret_val = sess.run([train_op, loss, unary_log,
-                                        pairwise_log, labels_unary,
+                                        labels_unary,
                                         labels_bin_sur, lr, img_name,
                                         global_step])
                     # unpack returned values
                     (_, loss_value, scores_unary,
-                        scores_pairwise_surr, yt_unary, yt_pairwise_surr,
+                        yt_unary, yt_pairwise_surr,
                         clr, filename, global_step_value) = ret_val
 
                 duration = time.time() - start_time
@@ -268,14 +270,14 @@ def train(dataset, resume_path=None):
             if FLAGS.evaluate_train_set:
                 train_loss, train_pixacc, train_iou, train_recall, train_precision = evaluate(
                                                                             sess, unary_log_train,
-                                                                            pairwise_log_train, loss_train,
+                                                                            loss_train,
                                                                             labels_unary_train, dataset,
                                                                             dataset_partition='train'
                                                                             )
 
             # evaluate model on the validation set
             val_loss, val_pixacc, val_iou, recall, precision = evaluate(sess, unary_log_val,
-                                                                        pairwise_log_val, loss_val,
+                                                                        loss_val,
                                                                         labels_unary_val, dataset)
             val_iou_data += [val_iou]
             val_pixacc_data += [val_pixacc]

@@ -193,33 +193,34 @@ def inference(inputs, batch_size, is_training=True):
                 net = convolve(net, conv6_1_sz, conv6_1_kernel, 'conv6_1')
                 net = convolve(net, conv6_sz, k, 'conv6_2')
                 featmap = convolve(net, conv6_sz, k, 'conv6_3')
+                unary = convolve(featmap, unary_pairwise_size, 1, 'unary_1')
 
             # Unary-Net
-            unary = convolve(featmap, unary_pairwise_size, 1, 'unary_1')
             unary = convolve(unary, FLAGS.num_classes, 1, 'unary_2', activation=None)
 
-            # Pairwise-Net - surrounding neighbourhood
-            # reshape the featmap tensor
-            pairwise_surr = tf.transpose(featmap, perm=[1, 2, 3, 0])
-            pairwise_surr = tf.reshape(pairwise_surr, shape=[-1, conv6_sz, batch_size])
-            first_indices = tf.gather(pairwise_surr, indices.FIRST_INDICES_SURR)
-            second_indices = tf.gather(pairwise_surr, indices.SECOND_INDICES_SURR)
-            pairwise_surr_map = tf.concat(1, [first_indices, second_indices])
+            # # Pairwise-Net - surrounding neighbourhood
+            # # reshape the featmap tensor
+            # pairwise_surr = tf.transpose(featmap, perm=[1, 2, 3, 0])
+            # pairwise_surr = tf.reshape(pairwise_surr, shape=[-1, conv6_sz, batch_size])
+            # first_indices = tf.gather(pairwise_surr, indices.FIRST_INDICES_SURR)
+            # second_indices = tf.gather(pairwise_surr, indices.SECOND_INDICES_SURR)
+            # pairwise_surr_map = tf.concat(1, [first_indices, second_indices])
 
-            # try without this reshaping + transposing
-            pairwise_surr_map = tf.reshape(pairwise_surr_map,
-                                           shape=[indices.NUMBER_OF_NEIGHBOURS_SURR, -1, 2 * conv6_sz, batch_size])
-            pairwise_surr_map = tf.transpose(pairwise_surr_map, perm=[3, 0, 1, 2])
+            # # try without this reshaping + transposing
+            # pairwise_surr_map = tf.reshape(pairwise_surr_map,
+            #                                shape=[indices.NUMBER_OF_NEIGHBOURS_SURR, -1, 2 * conv6_sz, batch_size])
+            # pairwise_surr_map = tf.transpose(pairwise_surr_map, perm=[3, 0, 1, 2])
 
-            # apply convolution layers
-            pairwise_surr_map = convolve(pairwise_surr_map, unary_pairwise_size, 1, 'pairwise_surr_1')
-            pairwise_surr_map = convolve(pairwise_surr_map, FLAGS.num_classes * FLAGS.num_classes, 1,
-                                         'pairwise_surr_2', activation=None)
+            # # apply convolution layers
+            # pairwise_surr_map = convolve(pairwise_surr_map, unary_pairwise_size, 1, 'pairwise_surr_1')
+            # pairwise_surr_map = convolve(pairwise_surr_map, FLAGS.num_classes * FLAGS.num_classes, 1,
+            #                              'pairwise_surr_2', activation=None)
 
-    return unary, pairwise_surr_map
+    return unary
+    #return unary, pairwise_surr_map
 
 
-def loss(out_unary, out_binary, labels_unary, labels_binary, batch_size, is_training=True):
+def loss(out_unary, labels_unary, labels_binary, batch_size, is_training=True):
     '''
     L2 regularized negative log likelihood
 
@@ -250,7 +251,7 @@ def loss(out_unary, out_binary, labels_unary, labels_binary, batch_size, is_trai
 
 
     '''
-    loss_val = losses.neg_log_likelihood(out_unary, out_binary, labels_unary, labels_binary, batch_size)
+    loss_val = losses.neg_log_likelihood(out_unary, labels_unary, labels_binary, batch_size)
     all_losses = [loss_val]
     total_loss = losses.total_loss_sum(all_losses)
 
