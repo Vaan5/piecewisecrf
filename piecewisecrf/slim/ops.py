@@ -24,7 +24,9 @@
 """
 
 
-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 
 import tensorflow as tf
@@ -124,6 +126,11 @@ def batch_norm(inputs,
       mean = moving_mean
       variance = moving_variance
     # Normalize the activations.
+    mean = tf.Print(mean, tf.get_collection(tf.GraphKeys.MOVING_AVERAGE_VARIABLES))
+    mean = tf.Print(mean, [mean], message='Mean')
+    variance = tf.Print(variance, [variance], message='Variance')
+    moving_mean = tf.Print(moving_mean, [moving_mean], message='Moving-Mean')
+    moving_variance = tf.Print(moving_variance, [moving_variance], message='Moving- Variance')
     outputs = tf.nn.batch_normalization(
         inputs, mean, variance, beta, gamma, epsilon)
     outputs.set_shape(inputs.get_shape())

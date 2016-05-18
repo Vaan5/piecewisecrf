@@ -164,8 +164,8 @@ def inference(inputs, batch_size, is_training=True):
         'scale': False,
     }
 
-    with scopes.arg_scope([slim.ops.conv2d], stddev=0.01, weight_decay=1, is_training=is_training):
-        with scopes.arg_scope([ops.conv2d], is_training=is_training):
+    with scopes.arg_scope([slim.ops.conv2d, slim.ops.fc], stddev=0.01, weight_decay=1):
+        with scopes.arg_scope([slim.ops.conv2d, ops.conv2d, ops.fc, ops.batch_norm, ops.dropout], is_training=is_training):
             # FeatMap-Net
 
             # VGG-16 part
@@ -189,7 +189,7 @@ def inference(inputs, batch_size, is_training=True):
             net = slim.ops.max_pool(net, [2, 2], stride=1, padding='SAME', scope='pool5')
 
             # Additional block
-            with scopes.arg_scope([ops.conv2d], batch_norm_params=bn_params):
+            with scopes.arg_scope([slim.ops.conv2d, ops.conv2d, ops.fc], batch_norm_params=bn_params):
                 net = convolve(net, conv6_1_sz, conv6_1_kernel, 'conv6_1')
                 net = convolve(net, conv6_sz, k, 'conv6_2')
                 featmap = convolve(net, conv6_sz, k, 'conv6_3')
@@ -252,12 +252,15 @@ def loss(out_unary, labels_unary, labels_binary, batch_size, is_training=True):
 
     '''
     loss_val = losses.neg_log_likelihood(out_unary, labels_unary, labels_binary, batch_size)
-    all_losses = [loss_val]
-    total_loss = losses.total_loss_sum(all_losses)
-
-    if is_training:
-        loss_averages_op = losses.add_loss_summaries(total_loss)
-        with tf.control_dependencies([loss_averages_op]):
-            total_loss = tf.identity(total_loss)
-
-    return total_loss
+    loss_val = tf.Print(loss_val, [loss_val], message='This is loss without regularization: ')
+    return loss_val
+#    #all_losses = [loss_val]
+#    #total_loss = losses.total_loss_sum(all_losses)
+#
+#    if is_training:
+#        loss_averages_op = losses.add_loss_summaries(total_loss)
+#        with tf.control_dependencies([loss_averages_op]):
+#            total_loss = tf.identity(total_loss)
+#
+#    total_loss = tf.Print(total_loss, [total_loss], message='This is total loss: ')
+#    return total_loss

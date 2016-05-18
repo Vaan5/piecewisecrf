@@ -17,7 +17,7 @@ import piecewisecrf.datasets.helpers.pairwise_label_generator as indices
 FLAGS = prefs.flags.FLAGS
 
 
-def evaluate(sess, unary, loss, labels_unary, dataset, dataset_partition='validation'):
+def evaluate(sess, unary, loss, labels_unary, dataset, img_name, dataset_partition='validation'):
     '''
 
     Evaluate trained model on the validation dataset
@@ -68,7 +68,7 @@ def evaluate(sess, unary, loss, labels_unary, dataset, dataset_partition='valida
     loss_avg = 0.0
 
     for step in trange(int((dataset.num_examples(dataset_partition) / FLAGS.batch_size))):
-        scores_unary, loss_val, yt_unary = sess.run([unary, loss, labels_unary])
+        scores_unary, loss_val, yt_unary, file_name = sess.run([unary, loss, labels_unary, img_name])
         for batch in range(FLAGS.batch_size):
             s = scores_unary[batch, :, :, :]
             #s = mean_field.mean_field(scores_unary[batch, :, :, :],
@@ -80,7 +80,7 @@ def evaluate(sess, unary, loss, labels_unary, dataset, dataset_partition='valida
             eval_helper.confusion_matrix(label_map.reshape(-1),
                                          yt_unary[batch], conf_mat,
                                          dataset.num_classes())
-            print(loss_val, dataset.num_examples(dataset_partition))
+            print(file_name[batch], loss_val)
             loss_avg += loss_val
     print("Total score")
 
@@ -133,7 +133,7 @@ def train(dataset, resume_path=None):
 
         # Get images and labels for training and validation
         image, labels_unary, labels_bin_sur, img_name = reader.inputs(dataset,
-                                                                      shuffle=True,
+                                                                      shuffle=False,
                                                                       num_epochs=FLAGS.max_epochs,
                                                                       dataset_partition='train')
         image_val, labels_unary_val, labels_bin_sur_val, img_name_val = reader.inputs(dataset,
@@ -213,7 +213,7 @@ def train(dataset, resume_path=None):
         summary_writer = tf.train.SummaryWriter(FLAGS.train_dir, graph=sess.graph)
 
         variable_map = train_helper.get_variable_map()
-        loss_avg_train = variable_map['model/model/total_loss/avg:0']
+        #loss_avg_train = variable_map['model/model/total_loss/avg:0']
 
         train_iou_data = []
         train_pixacc_data = []
@@ -225,11 +225,9 @@ def train(dataset, resume_path=None):
 
         ex_start_time = time.time()
         for epoch_num in range(1, FLAGS.max_epochs + 1):
-            conf_mat = np.zeros((FLAGS.num_classes, FLAGS.num_classes), dtype=np.uint64)
-
             for step in range(int(num_batches_per_epoch)):
                 start_time = time.time()
-                if step % 100 == 0:
+                if False:#step % 100 == 0:
                     ret_val = sess.run([train_op, loss, loss_avg_train, unary_log,
                                         labels_unary, labels_bin_sur, lr, img_name,
                                         global_step, summary_op])
@@ -253,6 +251,7 @@ def train(dataset, resume_path=None):
 
                 assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
 
+                print(filename, loss_value)
                 if step == 0:
                     print('lr = {}'.format(clr))
                 if step % 10 == 0:
@@ -272,13 +271,14 @@ def train(dataset, resume_path=None):
                                                                             sess, unary_log_train,
                                                                             loss_train,
                                                                             labels_unary_train, dataset,
+                                                                            img_name_train,
                                                                             dataset_partition='train'
                                                                             )
 
             # evaluate model on the validation set
             val_loss, val_pixacc, val_iou, recall, precision = evaluate(sess, unary_log_val,
                                                                         loss_val,
-                                                                        labels_unary_val, dataset)
+                                                                        labels_unary_val, dataset, img_name_val)
             val_iou_data += [val_iou]
             val_pixacc_data += [val_pixacc]
             val_loss_data += [val_loss]

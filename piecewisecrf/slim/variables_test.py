@@ -15,7 +15,9 @@
 """Tests for slim.variables."""
 
 
-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import tensorflow as tf
 
@@ -29,7 +31,7 @@ class VariablesTest(tf.test.TestCase):
     with self.test_session():
       with tf.variable_scope('A'):
         a = variables.variable('a', [5])
-        self.assertEqual(a.op.name, 'A/a')
+        self.assertEquals(a.op.name, 'A/a')
         self.assertListEqual(a.get_shape().as_list(), [5])
 
   def testGetVariables(self):
@@ -38,9 +40,9 @@ class VariablesTest(tf.test.TestCase):
         a = variables.variable('a', [5])
       with tf.variable_scope('B'):
         b = variables.variable('a', [5])
-      self.assertEqual([a, b], variables.get_variables())
-      self.assertEqual([a], variables.get_variables('A'))
-      self.assertEqual([b], variables.get_variables('B'))
+      self.assertEquals([a, b], variables.get_variables())
+      self.assertEquals([a], variables.get_variables('A'))
+      self.assertEquals([b], variables.get_variables('B'))
 
   def testGetVariablesSuffix(self):
     with self.test_session():
@@ -48,14 +50,14 @@ class VariablesTest(tf.test.TestCase):
         a = variables.variable('a', [5])
       with tf.variable_scope('A'):
         b = variables.variable('b', [5])
-      self.assertEqual([a], variables.get_variables(suffix='a'))
-      self.assertEqual([b], variables.get_variables(suffix='b'))
+      self.assertEquals([a], variables.get_variables(suffix='a'))
+      self.assertEquals([b], variables.get_variables(suffix='b'))
 
   def testGetVariableWithSingleVar(self):
     with self.test_session():
       with tf.variable_scope('parent'):
         a = variables.variable('child', [5])
-      self.assertEqual(a, variables.get_unique_variable('parent/child'))
+      self.assertEquals(a, variables.get_unique_variable('parent/child'))
 
   def testGetVariableWithDistractors(self):
     with self.test_session():
@@ -64,7 +66,7 @@ class VariablesTest(tf.test.TestCase):
         with tf.variable_scope('child'):
           variables.variable('grandchild1', [7])
           variables.variable('grandchild2', [9])
-      self.assertEqual(a, variables.get_unique_variable('parent/child'))
+      self.assertEquals(a, variables.get_unique_variable('parent/child'))
 
   def testGetVariableThrowsExceptionWithNoMatch(self):
     var_name = 'cant_find_me'
@@ -87,7 +89,7 @@ class VariablesTest(tf.test.TestCase):
         a = variables.variable('a', [5])
       with tf.variable_scope('B'):
         b = variables.variable('a', [5])
-      self.assertEqual([a, b], variables.get_variables_to_restore())
+      self.assertEquals([a, b], variables.get_variables_to_restore())
 
   def testNoneGetVariablesToRestore(self):
     with self.test_session():
@@ -95,8 +97,8 @@ class VariablesTest(tf.test.TestCase):
         a = variables.variable('a', [5], restore=False)
       with tf.variable_scope('B'):
         b = variables.variable('a', [5], restore=False)
-      self.assertEqual([], variables.get_variables_to_restore())
-      self.assertEqual([a, b], variables.get_variables())
+      self.assertEquals([], variables.get_variables_to_restore())
+      self.assertEquals([a, b], variables.get_variables())
 
   def testGetMixedVariablesToRestore(self):
     with self.test_session():
@@ -106,8 +108,8 @@ class VariablesTest(tf.test.TestCase):
       with tf.variable_scope('B'):
         c = variables.variable('c', [5])
         d = variables.variable('d', [5], restore=False)
-      self.assertEqual([a, b, c, d], variables.get_variables())
-      self.assertEqual([a, c], variables.get_variables_to_restore())
+      self.assertEquals([a, b, c, d], variables.get_variables())
+      self.assertEquals([a, c], variables.get_variables_to_restore())
 
   def testReuseVariable(self):
     with self.test_session():
@@ -115,7 +117,7 @@ class VariablesTest(tf.test.TestCase):
         a = variables.variable('a', [])
       with tf.variable_scope('A', reuse=True):
         b = variables.variable('a', [])
-      self.assertEqual(a, b)
+      self.assertEquals(a, b)
       self.assertListEqual([a], variables.get_variables())
 
   def testVariableWithDevice(self):
@@ -241,15 +243,15 @@ class VariablesTest(tf.test.TestCase):
     with self.test_session():
       a = variables.variable('a', [], collections='A')
       b = variables.variable('b', [], collections='B')
-      self.assertEqual(a, tf.get_collection('A')[0])
-      self.assertEqual(b, tf.get_collection('B')[0])
+      self.assertEquals(a, tf.get_collection('A')[0])
+      self.assertEquals(b, tf.get_collection('B')[0])
 
   def testVariableCollections(self):
     with self.test_session():
       a = variables.variable('a', [], collections=['A', 'C'])
       b = variables.variable('b', [], collections=['B', 'C'])
-      self.assertEqual(a, tf.get_collection('A')[0])
-      self.assertEqual(b, tf.get_collection('B')[0])
+      self.assertEquals(a, tf.get_collection('A')[0])
+      self.assertEquals(b, tf.get_collection('B')[0])
 
   def testVariableCollectionsWithArgScope(self):
     with self.test_session():
@@ -264,8 +266,8 @@ class VariablesTest(tf.test.TestCase):
         a = variables.variable('a', [])
         with scopes.arg_scope([variables.variable], collections='B'):
           b = variables.variable('b', [])
-      self.assertEqual(a, tf.get_collection('A')[0])
-      self.assertEqual(b, tf.get_collection('B')[0])
+      self.assertEquals(a, tf.get_collection('A')[0])
+      self.assertEquals(b, tf.get_collection('B')[0])
 
   def testVariableCollectionsWithArgScopeNonNested(self):
     with self.test_session():
@@ -299,8 +301,8 @@ class GetVariablesByNameTest(tf.test.TestCase):
       with tf.variable_scope('A'):
         a = variables.variable('a', [5])
         b = variables.variable('b', [5])
-        self.assertEqual([a], variables.get_variables_by_name('a'))
-        self.assertEqual([b], variables.get_variables_by_name('b'))
+        self.assertEquals([a], variables.get_variables_by_name('a'))
+        self.assertEquals([b], variables.get_variables_by_name('b'))
 
   def testGetVariablesByNameReturnsByValueWithScope(self):
     with self.test_session():
@@ -314,7 +316,7 @@ class GetVariablesByNameTest(tf.test.TestCase):
         matched_variables.append(4)
 
         matched_variables = variables.get_variables_by_name('a')
-        self.assertEqual([a], matched_variables)
+        self.assertEquals([a], matched_variables)
 
   def testGetVariablesByNameReturnsByValueWithoutScope(self):
     with self.test_session():
@@ -327,7 +329,7 @@ class GetVariablesByNameTest(tf.test.TestCase):
       matched_variables.append(4)
 
       matched_variables = variables.get_variables_by_name('a')
-      self.assertEqual([a], matched_variables)
+      self.assertEquals([a], matched_variables)
 
 
 class GlobalStepTest(tf.test.TestCase):
@@ -359,7 +361,7 @@ class GlobalStepTest(tf.test.TestCase):
         gs = variables.global_step()
         gs2 = variables.global_step()
       self.assertDeviceEqual(gs.device, '/cpu:0')
-      self.assertEqual(gs, gs2)
+      self.assertEquals(gs, gs2)
       self.assertDeviceEqual(gs2.device, '/cpu:0')
 
   def testReplicaDeviceSetter(self):
@@ -368,7 +370,7 @@ class GlobalStepTest(tf.test.TestCase):
       with scopes.arg_scope([variables.global_step], device=device_fn):
         gs = variables.global_step()
         gs2 = variables.global_step()
-        self.assertEqual(gs, gs2)
+        self.assertEquals(gs, gs2)
         self.assertDeviceEqual(gs.device, '/job:ps/task:0')
         self.assertDeviceEqual(gs.initial_value.device, '/job:ps/task:0')
         self.assertDeviceEqual(gs2.device, '/job:ps/task:0')
@@ -381,7 +383,7 @@ class GlobalStepTest(tf.test.TestCase):
       with scopes.arg_scope([variables.global_step], device=device_fn):
         gs = variables.global_step()
         gs2 = variables.global_step()
-        self.assertEqual(gs, gs2)
+        self.assertEquals(gs, gs2)
         self.assertDeviceEqual(gs.device, 'cpu:0')
         self.assertDeviceEqual(gs.initial_value.device, gs.device)
         self.assertDeviceEqual(gs2.device, 'cpu:0')
