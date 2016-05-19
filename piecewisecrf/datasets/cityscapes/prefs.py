@@ -52,7 +52,7 @@ tf.app.flags.DEFINE_string('checkpoint_dir', '/home/dcausevic/results_3x3', 'Pat
 
 
 #######################################################################################################################
-####                                    Neighbourhood definitions                                                  ####
+#                                    Neighbourhood definitions                                                        #
 #######################################################################################################################
 
 # Surroungind neighbourhood

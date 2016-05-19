@@ -151,10 +151,10 @@ def get_indices_above_below():
     '''
     container = []
     original_container = []
-    h = 19#int(FLAGS.img_height / FLAGS.subsample_factor)
-    w = 38#int(FLAGS.img_width / FLAGS.subsample_factor)
-    nsize_width = 3#FLAGS.neigbourhood_above_below_width
-    nsize_height = 4#FLAGS.neigbourhood_above_below_height
+    h = int(FLAGS.img_height / FLAGS.subsample_factor)
+    w = int(FLAGS.img_width / FLAGS.subsample_factor)
+    nsize_width = FLAGS.neigbourhood_above_below_width
+    nsize_height = FLAGS.neigbourhood_above_below_height
     nsize_width_half = int(nsize_width / 2)
     for i in range(h):
         for j in range(w):
