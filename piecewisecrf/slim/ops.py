@@ -22,9 +22,9 @@
    parameter. Additionally Ops that contain variables.variable have a trainable
    parameter, which control if the ops variables are trainable or not.
 """
-
-
-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 
 import tensorflow as tf
@@ -124,12 +124,21 @@ def batch_norm(inputs,
       mean = moving_mean
       variance = moving_variance
     # Normalize the activations.
-    outputs = tf.nn.batch_normalization(
+    if is_training:
+      with tf.control_dependencies([update_moving_mean, update_moving_variance]):  
+        outputs = tf.nn.batch_normalization(
+            inputs, mean, variance, beta, gamma, epsilon)
+        outputs.set_shape(inputs.get_shape())
+        if activation:
+          outputs = activation(outputs)
+        return outputs
+    else:
+      outputs = tf.nn.batch_normalization(
         inputs, mean, variance, beta, gamma, epsilon)
-    outputs.set_shape(inputs.get_shape())
-    if activation:
-      outputs = activation(outputs)
-    return outputs
+      outputs.set_shape(inputs.get_shape())
+      if activation:
+        outputs = activation(outputs)
+      return outputs
 
 
 def _two_element_tuple(int_or_tuple):
