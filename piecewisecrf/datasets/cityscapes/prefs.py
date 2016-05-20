@@ -6,7 +6,7 @@ flags = tf.app.flags
 # data preparation parameters
 flags.DEFINE_string('dataset_dir', '/home/dcausevic/datasets/cityscapes_full_prepared/',
                     'Directory containing folders created with prepare_dataset_files script')
-flags.DEFINE_string('save_dir', '/home/dcausevic/datasets/cityscapes_full_prepared/',
+flags.DEFINE_string('save_dir', '/home/dcausevic/datasets/cityscapes_both_potentials/',
                     'Directory in which tfrecord files will be saved')
 flags.DEFINE_integer('img_width', 608, 'Resized image width')
 flags.DEFINE_integer('img_height', 304, 'Resized image height')
@@ -22,33 +22,33 @@ tf.app.flags.DEFINE_string('vgg_init_file', '/home/dcausevic/FER/caffe-tensorflo
                            'Path to the vgg parameters file created with caffe-tensorflow')
 flags.DEFINE_integer('num_classes', 19,
                      'Number of classes in the dataset')
-flags.DEFINE_float('reg_factor', 0.005, 'Regularization factor')
+flags.DEFINE_float('reg_factor', 0.0005, 'Regularization factor')
 
 tf.app.flags.DEFINE_float('initial_learning_rate', 1e-4, 'Initial learning rate')
-tf.app.flags.DEFINE_float('num_epochs_per_decay', 3.0,
+tf.app.flags.DEFINE_float('num_epochs_per_decay', 4.0,
                           'Epochs after which learning rate decays.')
 tf.app.flags.DEFINE_float('learning_rate_decay_factor', 0.5,
                           'Learning rate decay factor.')
 tf.app.flags.DEFINE_float('moving_average_decay', 0.9999, '')
 tf.app.flags.DEFINE_boolean('log_device_placement', False, 'Whether to log device placement.')
 
-tf.app.flags.DEFINE_string('train_dir', '/home/dcausevic/results_3x3',
+tf.app.flags.DEFINE_string('train_dir', '/home/dcausevic/Desktop/final_results/results_both_binary_3x3',
                            'Directory where to write event logs and checkpoint.')
 tf.app.flags.DEFINE_integer('max_epochs', 30, 'Number of batches to run.')
-tf.app.flags.DEFINE_string('train_records_dir', '/home/dcausevic/datasets/cityscapes_full_prepared/train_train/608x304/tfrecords/',
+tf.app.flags.DEFINE_string('train_records_dir', '/home/dcausevic/datasets/cityscapes_both_potentials/train_val/608x304/tfrecords/',
                            'Path to the directory containing training tfrecords')
-tf.app.flags.DEFINE_string('val_records_dir', '/home/dcausevic/datasets/cityscapes_full_prepared/train_val/608x304/tfrecords/',
+tf.app.flags.DEFINE_string('val_records_dir', '/home/dcausevic/datasets/cityscapes_both_potentials/train_val/608x304/tfrecords/',
                            'Path to the directory containing training tfrecords')
-tf.app.flags.DEFINE_string('test_records_dir', '/home/dcausevic/datasets/cityscapes_full_prepared/val/608x304/tfrecords/',
+tf.app.flags.DEFINE_string('test_records_dir', '/home/dcausevic/datasets/cityscapes_both_potentials/val/608x304/tfrecords/',
                            'Path to the directory containing training tfrecords')
 tf.app.flags.DEFINE_boolean('is_training', True, '')
-tf.app.flags.DEFINE_boolean('evaluate_train_set', True, '')
+tf.app.flags.DEFINE_boolean('evaluate_train_set', False, '')
 
 # other parameters
 flags.DEFINE_integer('subsample_factor', 16, 'Subsample factor of the model')
 
 # evaluation parameters
-tf.app.flags.DEFINE_string('checkpoint_dir', '/home/dcausevic/results_3x3', 'Path to the directory containing trained models')
+tf.app.flags.DEFINE_string('checkpoint_dir', '/home/dcausevic/Desktop/final_results/results_both_binary_3x3', 'Path to the directory containing trained models')
 
 
 #######################################################################################################################

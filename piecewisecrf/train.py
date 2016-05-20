@@ -70,13 +70,13 @@ def evaluate(sess, unary, pairwise, loss, labels_unary, dataset, dataset_partiti
 
     calc_list = [unary]
     calc_list.extend([p[0] for p in pairwise])
-    calc_list.extend[loss, labels_unary]
+    calc_list.extend([loss, labels_unary])
     for step in trange(int((dataset.num_examples(dataset_partition) / FLAGS.batch_size))):
         ret_val = sess.run(calc_list)
         scores_unary = ret_val[0]
         scores_pairwise_list = ret_val[1: 1 + len(pairwise)]
         loss_val = ret_val[-2]
-        yt_unary = ret_val[-1] 
+        yt_unary = ret_val[-1]
         for batch in range(FLAGS.batch_size):
             pairwise_list = []
 
