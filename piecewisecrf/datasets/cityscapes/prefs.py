@@ -32,7 +32,7 @@ tf.app.flags.DEFINE_float('learning_rate_decay_factor', 0.5,
 tf.app.flags.DEFINE_float('moving_average_decay', 0.9999, '')
 tf.app.flags.DEFINE_boolean('log_device_placement', False, 'Whether to log device placement.')
 
-tf.app.flags.DEFINE_string('train_dir', '/home/dcausevic/Desktop/final_results/results_both_binary_3x3',
+tf.app.flags.DEFINE_string('train_dir', '/home/dcausevic/Desktop/final_results/results_both_binary_3x3_multi_scale',
                            'Directory where to write event logs and checkpoint.')
 tf.app.flags.DEFINE_integer('max_epochs', 30, 'Number of batches to run.')
 tf.app.flags.DEFINE_string('train_records_dir', '/home/dcausevic/datasets/cityscapes_both_potentials/train_val/608x304/tfrecords/',
@@ -48,7 +48,7 @@ tf.app.flags.DEFINE_boolean('evaluate_train_set', False, '')
 flags.DEFINE_integer('subsample_factor', 16, 'Subsample factor of the model')
 
 # evaluation parameters
-tf.app.flags.DEFINE_string('checkpoint_dir', '/home/dcausevic/Desktop/final_results/results_both_binary_3x3', 'Path to the directory containing trained models')
+tf.app.flags.DEFINE_string('checkpoint_dir', '/home/dcausevic/Desktop/final_results/results_both_binary_3x3_multi_scale', 'Path to the directory containing trained models')
 
 
 #######################################################################################################################

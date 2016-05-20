@@ -169,30 +169,95 @@ def inference(inputs, batch_size, is_training=True):
             # FeatMap-Net
 
             # VGG-16 part
-            net = convolve(inputs, conv1_sz, k, 'conv1_1', vgg_layers)
-            net = convolve(net, conv1_sz, k, 'conv1_2', vgg_layers)
-            net = ops.max_pool(net, [2, 2], scope='pool1')
-            net = convolve(net, conv2_sz, k, 'conv2_1', vgg_layers)
-            net = convolve(net, conv2_sz, k, 'conv2_2', vgg_layers)
-            net = ops.max_pool(net, [2, 2], scope='pool2')
-            net = convolve(net, conv3_sz, k, 'conv3_1', vgg_layers)
-            net = convolve(net, conv3_sz, k, 'conv3_2', vgg_layers)
-            net = convolve(net, conv3_sz, k, 'conv3_3', vgg_layers)
-            net = ops.max_pool(net, [2, 2], scope='pool3')
-            net = convolve(net, conv4_sz, k, 'conv4_1', vgg_layers)
-            net = convolve(net, conv4_sz, k, 'conv4_2', vgg_layers)
-            net = convolve(net, conv4_sz, k, 'conv4_3', vgg_layers)
-            net = ops.max_pool(net, [2, 2], scope='pool4')
-            net = convolve(net, conv5_sz, k, 'conv5_1', vgg_layers)
-            net = convolve(net, conv5_sz, k, 'conv5_2', vgg_layers)
-            net = convolve(net, conv5_sz, k, 'conv5_3', vgg_layers)
-            net = slim.ops.max_pool(net, [2, 2], stride=1, padding='SAME', scope='pool5')
+            with tf.variable_scope('vgg', reuse=False):
+                net1 = convolve(inputs, conv1_sz, k, 'conv1_1', vgg_layers)
+                net1 = convolve(net1, conv1_sz, k, 'conv1_2', vgg_layers)
+                net1 = ops.max_pool(net1, [2, 2], scope='pool1')
+                net1 = convolve(net1, conv2_sz, k, 'conv2_1', vgg_layers)
+                net1 = convolve(net1, conv2_sz, k, 'conv2_2', vgg_layers)
+                net1 = ops.max_pool(net1, [2, 2], scope='pool2')
+                net1 = convolve(net1, conv3_sz, k, 'conv3_1', vgg_layers)
+                net1 = convolve(net1, conv3_sz, k, 'conv3_2', vgg_layers)
+                net1 = convolve(net1, conv3_sz, k, 'conv3_3', vgg_layers)
+                net1 = ops.max_pool(net1, [2, 2], scope='pool3')
+                net1 = convolve(net1, conv4_sz, k, 'conv4_1', vgg_layers)
+                net1 = convolve(net1, conv4_sz, k, 'conv4_2', vgg_layers)
+                net1 = convolve(net1, conv4_sz, k, 'conv4_3', vgg_layers)
+                net1 = ops.max_pool(net1, [2, 2], scope='pool4')
+                net1 = convolve(net1, conv5_sz, k, 'conv5_1', vgg_layers)
+                net1 = convolve(net1, conv5_sz, k, 'conv5_2', vgg_layers)
+                net1 = convolve(net1, conv5_sz, k, 'conv5_3', vgg_layers)
+                net1 = slim.ops.max_pool(net1, [2, 2], stride=1, padding='SAME', scope='pool5')
+                with scopes.arg_scope([ops.conv2d], batch_norm_params=bn_params):
+                    net1 = convolve(net1, conv6_1_sz, conv6_1_kernel, 'conv6_1')
+
+            with scopes.arg_scope([ops.conv2d], batch_norm_params=bn_params):
+                net1 = convolve(net1, conv6_sz, k, 'conv6_2_1')
+                featmap1 = convolve(net1, conv6_sz, k, 'conv6_3_1')
+
+            inputs_down = tf.image.resize_images(inputs, int(0.8 * FLAGS.img_height), int(0.8 * FLAGS.img_width))
+            with tf.variable_scope('vgg', reuse=True):
+                net2 = convolve(inputs_down, conv1_sz, k, 'conv1_1', vgg_layers)
+                net2 = convolve(net2, conv1_sz, k, 'conv1_2', vgg_layers)
+                net2 = ops.max_pool(net2, [2, 2], scope='pool1')
+                net2 = convolve(net2, conv2_sz, k, 'conv2_1', vgg_layers)
+                net2 = convolve(net2, conv2_sz, k, 'conv2_2', vgg_layers)
+                net2 = ops.max_pool(net2, [2, 2], scope='pool2')
+                net2 = convolve(net2, conv3_sz, k, 'conv3_1', vgg_layers)
+                net2 = convolve(net2, conv3_sz, k, 'conv3_2', vgg_layers)
+                net2 = convolve(net2, conv3_sz, k, 'conv3_3', vgg_layers)
+                net2 = ops.max_pool(net2, [2, 2], scope='pool3')
+                net2 = convolve(net2, conv4_sz, k, 'conv4_1', vgg_layers)
+                net2 = convolve(net2, conv4_sz, k, 'conv4_2', vgg_layers)
+                net2 = convolve(net2, conv4_sz, k, 'conv4_3', vgg_layers)
+                net2 = ops.max_pool(net2, [2, 2], scope='pool4')
+                net2 = convolve(net2, conv5_sz, k, 'conv5_1', vgg_layers)
+                net2 = convolve(net2, conv5_sz, k, 'conv5_2', vgg_layers)
+                net2 = convolve(net2, conv5_sz, k, 'conv5_3', vgg_layers)
+                net2 = slim.ops.max_pool(net2, [2, 2], stride=1, padding='SAME', scope='pool5')
+                with scopes.arg_scope([ops.conv2d], batch_norm_params=bn_params):
+                    net2 = convolve(net2, conv6_1_sz, conv6_1_kernel, 'conv6_1')
+
+            with scopes.arg_scope([ops.conv2d], batch_norm_params=bn_params):
+                net2 = convolve(net2, conv6_sz, k, 'conv6_2_2')
+                featmap2 = convolve(net2, conv6_sz, k, 'conv6_3_2')
+
+            inputs_up = tf.image.resize_images(inputs, int(0.9 * FLAGS.img_height), int(0.9 * FLAGS.img_width))
+            with tf.variable_scope('vgg', reuse=True):
+                net3 = convolve(inputs_up, conv1_sz, k, 'conv1_1', vgg_layers)
+                net3 = convolve(net3, conv1_sz, k, 'conv1_2', vgg_layers)
+                net3 = ops.max_pool(net3, [2, 2], scope='pool1')
+                net3 = convolve(net3, conv2_sz, k, 'conv2_1', vgg_layers)
+                net3 = convolve(net3, conv2_sz, k, 'conv2_2', vgg_layers)
+                net3 = ops.max_pool(net3, [2, 2], scope='pool2')
+                net3 = convolve(net3, conv3_sz, k, 'conv3_1', vgg_layers)
+                net3 = convolve(net3, conv3_sz, k, 'conv3_2', vgg_layers)
+                net3 = convolve(net3, conv3_sz, k, 'conv3_3', vgg_layers)
+                net3 = ops.max_pool(net3, [2, 2], scope='pool3')
+                net3 = convolve(net3, conv4_sz, k, 'conv4_1', vgg_layers)
+                net3 = convolve(net3, conv4_sz, k, 'conv4_2', vgg_layers)
+                net3 = convolve(net3, conv4_sz, k, 'conv4_3', vgg_layers)
+                net3 = ops.max_pool(net3, [2, 2], scope='pool4')
+                net3 = convolve(net3, conv5_sz, k, 'conv5_1', vgg_layers)
+                net3 = convolve(net3, conv5_sz, k, 'conv5_2', vgg_layers)
+                net3 = convolve(net3, conv5_sz, k, 'conv5_3', vgg_layers)
+                net3 = slim.ops.max_pool(net3, [2, 2], stride=1, padding='SAME', scope='pool5')
+                with scopes.arg_scope([ops.conv2d], batch_norm_params=bn_params):
+                    net3 = convolve(net3, conv6_1_sz, conv6_1_kernel, 'conv6_1')
+
+            with scopes.arg_scope([ops.conv2d], batch_norm_params=bn_params):
+                net3 = convolve(net3, conv6_sz, k, 'conv6_2_3')
+                featmap3 = convolve(net3, conv6_sz, k, 'conv6_3_3')
+
+            # concatenate featmaps
+            featmap1_shape = featmap1.get_shape()
+            resize_shape = [featmap1_shape[1].value, featmap1_shape[2].value]
+            f1_up = tf.image.resize_bilinear(featmap2, resize_shape)
+            f2_up = tf.image.resize_bilinear(featmap3, resize_shape)
+            featmap = tf.concat(3, [f1_up, f2_up, featmap1])
 
             # Additional block
             with scopes.arg_scope([ops.conv2d], batch_norm_params=bn_params):
-                net = convolve(net, conv6_1_sz, conv6_1_kernel, 'conv6_1')
-                net = convolve(net, conv6_sz, k, 'conv6_2')
-                featmap = convolve(net, conv6_sz, k, 'conv6_3')
                 unary = convolve(featmap, unary_pairwise_size, 1, 'unary_1')
                 pairwise_surr = tf.transpose(featmap, perm=[1, 2, 3, 0])
                 pairwise_surr = tf.reshape(pairwise_surr, shape=[-1, conv6_sz, batch_size])
