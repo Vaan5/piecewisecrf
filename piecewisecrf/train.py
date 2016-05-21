@@ -72,7 +72,7 @@ def evaluate(sess, unary, pairwise, loss, labels_unary, dataset, dataset_partiti
         for batch in range(FLAGS.batch_size):
             s = mean_field.mean_field(scores_unary[batch, :, :, :],
                                       [(scores_pairwise[batch, :, :, :],
-                                       list(zip(indices.FIRST_INDICES_SURR, indices.SECOND_INDICES_SURR)),
+                                       list(zip(indices.FIRST_INDICES_AB, indices.SECOND_INDICES_AB)),
                                        indices.generate_encoding_decoding_dict(scores_unary.shape[3])[1]
                                         )])
             label_map = s.argmax(2).astype(np.int32, copy=False)
