@@ -1,5 +1,5 @@
 import numpy as np
-import piecewisecrf.datasets.cityscapes.prefs as prefs
+import piecewisecrf.config.prefs as prefs
 
 FLAGS = prefs.flags.FLAGS
 

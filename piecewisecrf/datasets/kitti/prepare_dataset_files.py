@@ -83,7 +83,7 @@ def main(dataset_dir, output_dir, subset, resize, onlyresize):
         Path to the output directory directory
 
     subset: str
-        Dataset subset (train, train_val, train_train, val)
+        Dataset subset (train, train_val, train_train, valid)
 
     resize: list
         [width, height] for the resized images

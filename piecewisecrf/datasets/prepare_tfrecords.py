@@ -6,11 +6,10 @@ import skimage.data
 import skimage.transform
 
 import numpy as np
-
 import tensorflow as tf
 
 import piecewisecrf.helpers.io as io
-import piecewisecrf.datasets.cityscapes.prefs as prefs
+import piecewisecrf.config.prefs as prefs
 import piecewisecrf.datasets.helpers.pairwise_label_generator as label_gen
 
 FLAGS = prefs.flags.FLAGS
@@ -132,6 +131,7 @@ def main(argv):
     prepare_dataset('train_val')
     prepare_dataset('train_train')
     prepare_dataset('val')
+    prepare_dataset('train')
 
 
 if __name__ == '__main__':

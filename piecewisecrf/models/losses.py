@@ -2,7 +2,7 @@ import tensorflow as tf
 
 from piecewisecrf.slim import slim
 import piecewisecrf.datasets.helpers.pairwise_label_generator as indices
-import piecewisecrf.datasets.cityscapes.prefs as prefs
+import piecewisecrf.config.prefs as prefs
 
 FLAGS = prefs.flags.FLAGS
 

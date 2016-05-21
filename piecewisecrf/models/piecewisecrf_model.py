@@ -5,7 +5,7 @@ from piecewisecrf.slim import slim
 from piecewisecrf.slim import ops
 from piecewisecrf.slim import scopes
 
-import piecewisecrf.datasets.cityscapes.prefs as prefs
+import piecewisecrf.config.prefs as prefs
 import piecewisecrf.datasets.helpers.pairwise_label_generator as indices
 import piecewisecrf.models.losses as losses
 

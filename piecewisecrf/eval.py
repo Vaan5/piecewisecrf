@@ -8,7 +8,7 @@ from tqdm import trange
 import piecewisecrf.datasets.reader as reader
 import piecewisecrf.models.piecewisecrf_model as model
 import piecewisecrf.helpers.mean_field as mean_field
-import piecewisecrf.datasets.cityscapes.prefs as prefs
+import piecewisecrf.config.prefs as prefs
 import piecewisecrf.datasets.helpers.pairwise_label_generator as indices
 import piecewisecrf.helpers.eval as eval_helper
 

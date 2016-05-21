@@ -1,11 +1,36 @@
 import tensorflow as tf
-import piecewisecrf.datasets.cityscapes.prefs as prefs
+import piecewisecrf.config.prefs as prefs
 import piecewisecrf.datasets.helpers.pairwise_label_generator as label_gen
 
 FLAGS = prefs.flags.FLAGS
 
 
 def read_and_decode(filename_queue):
+    '''
+
+    Reads tfrecords from a queue and decodes them
+
+    Parameters
+    ----------
+    filename_queue : RandomShuffleQueue
+        Filename queue created with tf.train.string_input_producer
+
+    Returns
+    -------
+    image: numpy array
+        Input rgb image
+
+    labels_unary: numpy array
+        Labels for unary potentials
+
+    labels_bin_sur: numpy array
+        Labels for pairwise potentials (surrouding neighbourhood)
+
+    img_name: str
+        Image name
+
+
+    '''
     reader = tf.TFRecordReader()
     _, serialized_example = reader.read(filename_queue)
     features = tf.parse_single_example(
@@ -38,6 +63,41 @@ def read_and_decode(filename_queue):
 
 
 def inputs(dataset, shuffle=True, num_epochs=False, dataset_partition='train'):
+    '''
+
+    Creates batches for training and validating the net
+
+    Parameters
+    ----------
+    dataset : Dataset
+        Dataset for which batches are being created
+
+    shuffle: bool
+        Whether records should be shuffled when creating batches
+
+    num_epochs: int
+        Maximum number of epochs for which batches should be prepared.
+        Can be left as False / None
+
+    dataset_partition: str
+        Subset of the original dataset for which batches are being created
+
+    Returns
+    -------
+    image: numpy array
+        Input rgb image batch
+
+    labels_unary: numpy array
+        Labels batch for unary potentials
+
+    labels_bin_sur: numpy array
+        Labels batch for pairwise potentials (surrouding neighbourhood)
+
+    img_name: str
+        Image name batch
+
+
+    '''
     batch_size = FLAGS.batch_size
     if not num_epochs:
         num_epochs = None

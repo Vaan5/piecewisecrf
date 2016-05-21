@@ -6,6 +6,32 @@ import tqdm
 
 
 def choose_cities(img_input_dir, min_size, max_size):
+    '''
+
+    Randomly selects cities from the train dataset such that the
+    total number of selected images is between min_size and max_size
+
+    Parameters
+    ----------
+    img_input_dir : str
+        Path to the directory containing training images
+
+    min_size: int
+        Minimum allowed size of the validation subset
+
+    max_size: int
+        Maximum allowed size of the validation subset
+
+    Returns
+    -------
+    picked_cities: list
+        List of picked image names
+
+    current_size: int
+        Number of picked images
+
+
+    '''
     cities = next(os.walk(os.path.join(img_input_dir, 'train')))[1]
 
     current_size = 0
@@ -24,6 +50,26 @@ def choose_cities(img_input_dir, min_size, max_size):
 
 
 def main(img_input_dir, label_input_dir, min_size, max_size):
+    '''
+
+    Splits the train dataset into train and validation subsets
+
+    Parameters
+    ----------
+    img_input_dir : str
+        Path to the image folder
+
+    label_input_dir: str
+        Path to the labels folder
+
+    min_size: int
+        Minimum allowed size of the validation subset
+
+    max_size: int
+        Maximum allowed size of the validation subset
+
+
+    '''
     val_cities, val_size = choose_cities(img_input_dir, min_size, max_size)
     print("Picked cities:", list(val_cities))
     print("Validation set size:", val_size)

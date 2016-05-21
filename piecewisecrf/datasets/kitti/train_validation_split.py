@@ -111,7 +111,7 @@ def main(dataset_dir, size):
     train_data_path = os.path.join(train_path, 'data')
     if not os.path.exists(train_data_path):
         os.makedirs(train_data_path)
-    train_data_path = os.path.join(train_data_path, 'data')
+    train_data_path = os.path.join(train_data_path, 'rgb')
     if not os.path.exists(train_data_path):
         os.makedirs(train_data_path)
     train_label_path = os.path.join(train_path, 'labels')
@@ -120,7 +120,7 @@ def main(dataset_dir, size):
     val_data_path = os.path.join(val_path, 'data')
     if not os.path.exists(val_data_path):
         os.makedirs(val_data_path)
-    val_data_path = os.path.join(val_data_path, 'data')
+    val_data_path = os.path.join(val_data_path, 'rgb')
     if not os.path.exists(val_data_path):
         os.makedirs(val_data_path)
     val_label_path = os.path.join(val_path, 'labels')

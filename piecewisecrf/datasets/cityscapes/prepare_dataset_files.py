@@ -8,11 +8,25 @@ import skimage.transform
 
 import numpy as np
 
-import piecewisecrf.datasets.cityscapes as dataset
 import piecewisecrf.helpers.io as io
+from piecewisecrf.datasets.cityscapes.cityscapes import CityscapesDataset
 
 
 def _create_folder(root_dir, sub_dir):
+    '''
+
+    Creates a subfolder sub_dir in root_dir
+
+    Parameters
+    ----------
+    root_dir : str
+        Path to the root directory
+
+    sub_dir: str
+        Subdirectory name
+
+
+    '''
     dir_path = os.path.join(root_dir, sub_dir)
 
     if not os.path.exists(dir_path):
@@ -22,7 +36,28 @@ def _create_folder(root_dir, sub_dir):
 
 
 def _create_folders(root_dir, sub_dir):
-    # create folder hierarchy for original size images
+    '''
+
+    Creates the following folder hierarchy inside root_dir
+
+    root_dir
+        | sub_dir
+            | gt
+            | img
+            | imgppm
+            | gt_ppm
+            | gt_bin
+
+    Parameters
+    ----------
+    root_dir : str
+        Path to the root directory
+
+    sub_dir: str
+        Subdirectory name
+
+
+    '''
     output_dir = _create_folder(root_dir, sub_dir)
 
     label_dest_dir = _create_folder(output_dir, 'gt')
@@ -36,6 +71,43 @@ def _create_folders(root_dir, sub_dir):
 
 def main(img_input_dir, label_input_dir, output_dir, subset, resize,
          onlyresize, containsl, replacel, replacei):
+    '''
+
+    Prepares all the necessary data for the semantic segmentation pipeline
+
+    Parameters
+    ----------
+    img_input_dir : str
+        Path to the image directory
+
+    label_input_dir : str
+        Path to the labels directory
+
+    output_dir: str
+        Path to the output directory directory
+
+    subset: str
+        Dataset subset (train, train_val, train_train, valid)
+
+    resize: list
+        [width, height] for the resized images
+
+    onlyresize: bool
+        Whether only resized images will be created
+
+    containsl: str
+        String which all label files must contain
+
+    replacel: list
+        List of two strings. The first string in the labels file name will be
+        replaced with the second string
+
+    replacei: list
+        List of two strings. The first string in the image file name will be
+        replaced with the second string
+
+
+    '''
     print("Creating directories")
     output_dir = _create_folder(output_dir, subset)
 
@@ -87,6 +159,7 @@ def main(img_input_dir, label_input_dir, output_dir, subset, resize,
         else:
             files.extend([(os.path.join(label_city_dir, x), x) for x in next(os.walk(label_city_dir))[2]])
 
+    dataset = CityscapesDataset()
     for file_path, file_name in tqdm.tqdm(files):
         img = skimage.data.load(file_path)
         file_prefix = file_name[0:file_name.index('.')]

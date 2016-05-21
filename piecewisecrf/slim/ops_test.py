@@ -13,9 +13,9 @@
 # limitations under the License.
 # ==============================================================================
 """Tests for slim.ops."""
-
-
-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 
 import numpy as np
@@ -35,7 +35,7 @@ class ConvTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       output = ops.conv2d(images, 32, [3, 3])
-      self.assertEqual(output.op.name, 'Conv/Relu')
+      self.assertEquals(output.op.name, 'Conv/Relu')
       self.assertListEqual(output.get_shape().as_list(), [5, height, width, 32])
 
   def testCreateSquareConv(self):
@@ -43,7 +43,7 @@ class ConvTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       output = ops.conv2d(images, 32, 3)
-      self.assertEqual(output.op.name, 'Conv/Relu')
+      self.assertEquals(output.op.name, 'Conv/Relu')
       self.assertListEqual(output.get_shape().as_list(), [5, height, width, 32])
 
   def testCreateConvWithTensorShape(self):
@@ -51,7 +51,7 @@ class ConvTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       output = ops.conv2d(images, 32, images.get_shape()[1:3])
-      self.assertEqual(output.op.name, 'Conv/Relu')
+      self.assertEquals(output.op.name, 'Conv/Relu')
       self.assertListEqual(output.get_shape().as_list(), [5, height, width, 32])
 
   def testCreateFullyConv(self):
@@ -59,7 +59,7 @@ class ConvTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 32), seed=1)
       output = ops.conv2d(images, 64, images.get_shape()[1:3], padding='VALID')
-      self.assertEqual(output.op.name, 'Conv/Relu')
+      self.assertEquals(output.op.name, 'Conv/Relu')
       self.assertListEqual(output.get_shape().as_list(), [5, 1, 1, 64])
 
   def testCreateVerticalConv(self):
@@ -67,7 +67,7 @@ class ConvTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       output = ops.conv2d(images, 32, [3, 1])
-      self.assertEqual(output.op.name, 'Conv/Relu')
+      self.assertEquals(output.op.name, 'Conv/Relu')
       self.assertListEqual(output.get_shape().as_list(),
                            [5, height, width, 32])
 
@@ -76,7 +76,7 @@ class ConvTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       output = ops.conv2d(images, 32, [1, 3])
-      self.assertEqual(output.op.name, 'Conv/Relu')
+      self.assertEquals(output.op.name, 'Conv/Relu')
       self.assertListEqual(output.get_shape().as_list(),
                            [5, height, width, 32])
 
@@ -85,7 +85,7 @@ class ConvTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       output = ops.conv2d(images, 32, [3, 3], stride=2)
-      self.assertEqual(output.op.name, 'Conv/Relu')
+      self.assertEquals(output.op.name, 'Conv/Relu')
       self.assertListEqual(output.get_shape().as_list(),
                            [5, height/2, width/2, 32])
 
@@ -104,14 +104,14 @@ class ConvTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       output = ops.conv2d(images, 32, [3, 3], scope='conv1')
-      self.assertEqual(output.op.name, 'conv1/Relu')
+      self.assertEquals(output.op.name, 'conv1/Relu')
 
   def testCreateConvWithoutActivation(self):
     height, width = 3, 3
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       output = ops.conv2d(images, 32, [3, 3], activation=None)
-      self.assertEqual(output.op.name, 'Conv/BiasAdd')
+      self.assertEquals(output.op.name, 'Conv/BiasAdd')
 
   def testCreateConvValid(self):
     height, width = 3, 3
@@ -126,7 +126,7 @@ class ConvTest(tf.test.TestCase):
       images = tf.random_uniform((5, height, width, 3), seed=1)
       ops.conv2d(images, 32, [3, 3], weight_decay=0.01)
       wd = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)[0]
-      self.assertEqual(wd.op.name,
+      self.assertEquals(wd.op.name,
                         'Conv/weights/Regularizer/L2Regularizer/value')
       sess.run(tf.initialize_all_variables())
       self.assertTrue(sess.run(wd) <= 0.01)
@@ -136,7 +136,7 @@ class ConvTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       ops.conv2d(images, 32, [3, 3], weight_decay=0)
-      self.assertEqual(
+      self.assertEquals(
           tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES), [])
 
   def testReuseVars(self):
@@ -144,31 +144,31 @@ class ConvTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       ops.conv2d(images, 32, [3, 3], scope='conv1')
-      self.assertEqual(len(variables.get_variables()), 2)
+      self.assertEquals(len(variables.get_variables()), 2)
       ops.conv2d(images, 32, [3, 3], scope='conv1', reuse=True)
-      self.assertEqual(len(variables.get_variables()), 2)
+      self.assertEquals(len(variables.get_variables()), 2)
 
   def testNonReuseVars(self):
     height, width = 3, 3
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       ops.conv2d(images, 32, [3, 3])
-      self.assertEqual(len(variables.get_variables()), 2)
+      self.assertEquals(len(variables.get_variables()), 2)
       ops.conv2d(images, 32, [3, 3])
-      self.assertEqual(len(variables.get_variables()), 4)
+      self.assertEquals(len(variables.get_variables()), 4)
 
   def testReuseConvWithWD(self):
     height, width = 3, 3
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       ops.conv2d(images, 32, [3, 3], weight_decay=0.01, scope='conv1')
-      self.assertEqual(len(variables.get_variables()), 2)
-      self.assertEqual(
+      self.assertEquals(len(variables.get_variables()), 2)
+      self.assertEquals(
           len(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)), 1)
       ops.conv2d(images, 32, [3, 3], weight_decay=0.01, scope='conv1',
                  reuse=True)
-      self.assertEqual(len(variables.get_variables()), 2)
-      self.assertEqual(
+      self.assertEquals(len(variables.get_variables()), 2)
+      self.assertEquals(
           len(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)), 1)
 
   def testConvWithBatchNorm(self):
@@ -178,9 +178,9 @@ class ConvTest(tf.test.TestCase):
       with scopes.arg_scope([ops.conv2d], batch_norm_params={'decay': 0.9}):
         net = ops.conv2d(images, 32, [3, 3])
         net = ops.conv2d(net, 32, [3, 3])
-      self.assertEqual(len(variables.get_variables()), 8)
-      self.assertEqual(len(variables.get_variables('Conv/BatchNorm')), 3)
-      self.assertEqual(len(variables.get_variables('Conv_1/BatchNorm')), 3)
+      self.assertEquals(len(variables.get_variables()), 8)
+      self.assertEquals(len(variables.get_variables('Conv/BatchNorm')), 3)
+      self.assertEquals(len(variables.get_variables('Conv_1/BatchNorm')), 3)
 
   def testReuseConvWithBatchNorm(self):
     height, width = 3, 3
@@ -189,9 +189,9 @@ class ConvTest(tf.test.TestCase):
       with scopes.arg_scope([ops.conv2d], batch_norm_params={'decay': 0.9}):
         net = ops.conv2d(images, 32, [3, 3], scope='Conv')
         net = ops.conv2d(net, 32, [3, 3], scope='Conv', reuse=True)
-      self.assertEqual(len(variables.get_variables()), 4)
-      self.assertEqual(len(variables.get_variables('Conv/BatchNorm')), 3)
-      self.assertEqual(len(variables.get_variables('Conv_1/BatchNorm')), 0)
+      self.assertEquals(len(variables.get_variables()), 4)
+      self.assertEquals(len(variables.get_variables('Conv/BatchNorm')), 3)
+      self.assertEquals(len(variables.get_variables('Conv_1/BatchNorm')), 0)
 
 
 class FCTest(tf.test.TestCase):
@@ -201,7 +201,7 @@ class FCTest(tf.test.TestCase):
     with self.test_session():
       inputs = tf.random_uniform((5, height * width * 3), seed=1)
       output = ops.fc(inputs, 32)
-      self.assertEqual(output.op.name, 'FC/Relu')
+      self.assertEquals(output.op.name, 'FC/Relu')
       self.assertListEqual(output.get_shape().as_list(), [5, 32])
 
   def testCreateFCWithScope(self):
@@ -209,7 +209,7 @@ class FCTest(tf.test.TestCase):
     with self.test_session():
       inputs = tf.random_uniform((5, height * width * 3), seed=1)
       output = ops.fc(inputs, 32, scope='fc1')
-      self.assertEqual(output.op.name, 'fc1/Relu')
+      self.assertEquals(output.op.name, 'fc1/Relu')
 
   def testCreateFcCreatesWeightsAndBiasesVars(self):
     height, width = 3, 3
@@ -226,25 +226,25 @@ class FCTest(tf.test.TestCase):
     inputs = tf.random_uniform((5, height * width * 3), seed=1)
     with self.test_session():
       ops.fc(inputs, 32, scope='fc1')
-      self.assertEqual(len(variables.get_variables('fc1')), 2)
+      self.assertEquals(len(variables.get_variables('fc1')), 2)
       ops.fc(inputs, 32, scope='fc1', reuse=True)
-      self.assertEqual(len(variables.get_variables('fc1')), 2)
+      self.assertEquals(len(variables.get_variables('fc1')), 2)
 
   def testNonReuseVars(self):
     height, width = 3, 3
     inputs = tf.random_uniform((5, height * width * 3), seed=1)
     with self.test_session():
       ops.fc(inputs, 32)
-      self.assertEqual(len(variables.get_variables('FC')), 2)
+      self.assertEquals(len(variables.get_variables('FC')), 2)
       ops.fc(inputs, 32)
-      self.assertEqual(len(variables.get_variables('FC')), 4)
+      self.assertEquals(len(variables.get_variables('FC')), 4)
 
   def testCreateFCWithoutActivation(self):
     height, width = 3, 3
     with self.test_session():
       inputs = tf.random_uniform((5, height * width * 3), seed=1)
       output = ops.fc(inputs, 32, activation=None)
-      self.assertEqual(output.op.name, 'FC/xw_plus_b')
+      self.assertEquals(output.op.name, 'FC/xw_plus_b')
 
   def testCreateFCWithWD(self):
     height, width = 3, 3
@@ -252,7 +252,7 @@ class FCTest(tf.test.TestCase):
       inputs = tf.random_uniform((5, height * width * 3), seed=1)
       ops.fc(inputs, 32, weight_decay=0.01)
       wd = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)[0]
-      self.assertEqual(wd.op.name,
+      self.assertEquals(wd.op.name,
                         'FC/weights/Regularizer/L2Regularizer/value')
       sess.run(tf.initialize_all_variables())
       self.assertTrue(sess.run(wd) <= 0.01)
@@ -262,7 +262,7 @@ class FCTest(tf.test.TestCase):
     with self.test_session():
       inputs = tf.random_uniform((5, height * width * 3), seed=1)
       ops.fc(inputs, 32, weight_decay=0)
-      self.assertEqual(
+      self.assertEquals(
           tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES), [])
 
   def testReuseFCWithWD(self):
@@ -270,12 +270,12 @@ class FCTest(tf.test.TestCase):
     with self.test_session():
       inputs = tf.random_uniform((5, height * width * 3), seed=1)
       ops.fc(inputs, 32, weight_decay=0.01, scope='fc')
-      self.assertEqual(len(variables.get_variables()), 2)
-      self.assertEqual(
+      self.assertEquals(len(variables.get_variables()), 2)
+      self.assertEquals(
           len(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)), 1)
       ops.fc(inputs, 32, weight_decay=0.01, scope='fc', reuse=True)
-      self.assertEqual(len(variables.get_variables()), 2)
-      self.assertEqual(
+      self.assertEquals(len(variables.get_variables()), 2)
+      self.assertEquals(
           len(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)), 1)
 
   def testFCWithBatchNorm(self):
@@ -285,9 +285,9 @@ class FCTest(tf.test.TestCase):
       with scopes.arg_scope([ops.fc], batch_norm_params={}):
         net = ops.fc(images, 27)
         net = ops.fc(net, 27)
-      self.assertEqual(len(variables.get_variables()), 8)
-      self.assertEqual(len(variables.get_variables('FC/BatchNorm')), 3)
-      self.assertEqual(len(variables.get_variables('FC_1/BatchNorm')), 3)
+      self.assertEquals(len(variables.get_variables()), 8)
+      self.assertEquals(len(variables.get_variables('FC/BatchNorm')), 3)
+      self.assertEquals(len(variables.get_variables('FC_1/BatchNorm')), 3)
 
   def testReuseFCWithBatchNorm(self):
     height, width = 3, 3
@@ -296,8 +296,8 @@ class FCTest(tf.test.TestCase):
       with scopes.arg_scope([ops.fc], batch_norm_params={'decay': 0.9}):
         net = ops.fc(images, 27, scope='fc1')
         net = ops.fc(net, 27, scope='fc1', reuse=True)
-      self.assertEqual(len(variables.get_variables()), 4)
-      self.assertEqual(len(variables.get_variables('fc1/BatchNorm')), 3)
+      self.assertEquals(len(variables.get_variables()), 4)
+      self.assertEquals(len(variables.get_variables('fc1/BatchNorm')), 3)
 
 
 class MaxPoolTest(tf.test.TestCase):
@@ -307,7 +307,7 @@ class MaxPoolTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       output = ops.max_pool(images, [3, 3])
-      self.assertEqual(output.op.name, 'MaxPool/MaxPool')
+      self.assertEquals(output.op.name, 'MaxPool/MaxPool')
       self.assertListEqual(output.get_shape().as_list(), [5, 1, 1, 3])
 
   def testCreateSquareMaxPool(self):
@@ -315,7 +315,7 @@ class MaxPoolTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       output = ops.max_pool(images, 3)
-      self.assertEqual(output.op.name, 'MaxPool/MaxPool')
+      self.assertEquals(output.op.name, 'MaxPool/MaxPool')
       self.assertListEqual(output.get_shape().as_list(), [5, 1, 1, 3])
 
   def testCreateMaxPoolWithScope(self):
@@ -323,7 +323,7 @@ class MaxPoolTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       output = ops.max_pool(images, [3, 3], scope='pool1')
-      self.assertEqual(output.op.name, 'pool1/MaxPool')
+      self.assertEquals(output.op.name, 'pool1/MaxPool')
 
   def testCreateMaxPoolSAME(self):
     height, width = 3, 3
@@ -354,7 +354,7 @@ class AvgPoolTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       output = ops.avg_pool(images, [3, 3])
-      self.assertEqual(output.op.name, 'AvgPool/AvgPool')
+      self.assertEquals(output.op.name, 'AvgPool/AvgPool')
       self.assertListEqual(output.get_shape().as_list(), [5, 1, 1, 3])
 
   def testCreateSquareAvgPool(self):
@@ -362,7 +362,7 @@ class AvgPoolTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       output = ops.avg_pool(images, 3)
-      self.assertEqual(output.op.name, 'AvgPool/AvgPool')
+      self.assertEquals(output.op.name, 'AvgPool/AvgPool')
       self.assertListEqual(output.get_shape().as_list(), [5, 1, 1, 3])
 
   def testCreateAvgPoolWithScope(self):
@@ -370,7 +370,7 @@ class AvgPoolTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       output = ops.avg_pool(images, [3, 3], scope='pool1')
-      self.assertEqual(output.op.name, 'pool1/AvgPool')
+      self.assertEquals(output.op.name, 'pool1/AvgPool')
 
   def testCreateAvgPoolSAME(self):
     height, width = 3, 3
@@ -400,7 +400,7 @@ class OneHotEncodingTest(tf.test.TestCase):
     with self.test_session():
       labels = tf.constant([0, 1, 2])
       output = ops.one_hot_encoding(labels, num_classes=3)
-      self.assertEqual(output.op.name, 'OneHotEncoding/SparseToDense')
+      self.assertEquals(output.op.name, 'OneHotEncoding/SparseToDense')
       self.assertListEqual(output.get_shape().as_list(), [3, 3])
 
   def testOneHotEncoding(self):
@@ -420,7 +420,7 @@ class DropoutTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       output = ops.dropout(images)
-      self.assertEqual(output.op.name, 'Dropout/dropout/mul_1')
+      self.assertEquals(output.op.name, 'Dropout/dropout/mul_1')
       output.get_shape().assert_is_compatible_with(images.get_shape())
 
   def testCreateDropoutNoTraining(self):
@@ -428,7 +428,7 @@ class DropoutTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1, name='images')
       output = ops.dropout(images, is_training=False)
-      self.assertEqual(output, images)
+      self.assertEquals(output, images)
 
 
 class FlattenTest(tf.test.TestCase):
@@ -438,7 +438,7 @@ class FlattenTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1, name='images')
       output = ops.flatten(images)
-      self.assertEqual(output.get_shape().num_elements(),
+      self.assertEquals(output.get_shape().num_elements(),
                         images.get_shape().num_elements())
       self.assertEqual(output.get_shape()[0], images.get_shape()[0])
 
@@ -447,7 +447,7 @@ class FlattenTest(tf.test.TestCase):
     with self.test_session():
       images = tf.random_uniform((5, height, width), seed=1, name='images')
       output = ops.flatten(images)
-      self.assertEqual(output.get_shape().num_elements(),
+      self.assertEquals(output.get_shape().num_elements(),
                         images.get_shape().num_elements())
       self.assertEqual(output.get_shape()[0], images.get_shape()[0])
 
@@ -457,10 +457,10 @@ class FlattenTest(tf.test.TestCase):
       images = tf.random_uniform((5, height, width, 3), seed=1, name='images')
       inputs = tf.placeholder(tf.int32, (None, height, width, 3))
       output = ops.flatten(inputs)
-      self.assertEqual(output.get_shape().as_list(),
+      self.assertEquals(output.get_shape().as_list(),
                         [None, height * width * 3])
       output = sess.run(output, {inputs: images.eval()})
-      self.assertEqual(output.size,
+      self.assertEquals(output.size,
                         images.get_shape().num_elements())
       self.assertEqual(output.shape[0], images.get_shape()[0])
 
@@ -481,13 +481,13 @@ class BatchNormTest(tf.test.TestCase):
       images = tf.random_uniform((5, height, width, 3), seed=1)
       ops.batch_norm(images)
       beta = variables.get_variables_by_name('beta')[0]
-      self.assertEqual(beta.op.name, 'BatchNorm/beta')
+      self.assertEquals(beta.op.name, 'BatchNorm/beta')
       gamma = variables.get_variables_by_name('gamma')
-      self.assertEqual(gamma, [])
+      self.assertEquals(gamma, [])
       moving_mean = tf.moving_average_variables()[0]
       moving_variance = tf.moving_average_variables()[1]
-      self.assertEqual(moving_mean.op.name, 'BatchNorm/moving_mean')
-      self.assertEqual(moving_variance.op.name, 'BatchNorm/moving_variance')
+      self.assertEquals(moving_mean.op.name, 'BatchNorm/moving_mean')
+      self.assertEquals(moving_variance.op.name, 'BatchNorm/moving_variance')
 
   def testCreateVariablesWithScale(self):
     height, width = 3, 3
@@ -496,12 +496,12 @@ class BatchNormTest(tf.test.TestCase):
       ops.batch_norm(images, scale=True)
       beta = variables.get_variables_by_name('beta')[0]
       gamma = variables.get_variables_by_name('gamma')[0]
-      self.assertEqual(beta.op.name, 'BatchNorm/beta')
-      self.assertEqual(gamma.op.name, 'BatchNorm/gamma')
+      self.assertEquals(beta.op.name, 'BatchNorm/beta')
+      self.assertEquals(gamma.op.name, 'BatchNorm/gamma')
       moving_mean = tf.moving_average_variables()[0]
       moving_variance = tf.moving_average_variables()[1]
-      self.assertEqual(moving_mean.op.name, 'BatchNorm/moving_mean')
-      self.assertEqual(moving_variance.op.name, 'BatchNorm/moving_variance')
+      self.assertEquals(moving_mean.op.name, 'BatchNorm/moving_mean')
+      self.assertEquals(moving_variance.op.name, 'BatchNorm/moving_variance')
 
   def testCreateVariablesWithoutCenterWithScale(self):
     height, width = 3, 3
@@ -509,13 +509,13 @@ class BatchNormTest(tf.test.TestCase):
       images = tf.random_uniform((5, height, width, 3), seed=1)
       ops.batch_norm(images, center=False, scale=True)
       beta = variables.get_variables_by_name('beta')
-      self.assertEqual(beta, [])
+      self.assertEquals(beta, [])
       gamma = variables.get_variables_by_name('gamma')[0]
-      self.assertEqual(gamma.op.name, 'BatchNorm/gamma')
+      self.assertEquals(gamma.op.name, 'BatchNorm/gamma')
       moving_mean = tf.moving_average_variables()[0]
       moving_variance = tf.moving_average_variables()[1]
-      self.assertEqual(moving_mean.op.name, 'BatchNorm/moving_mean')
-      self.assertEqual(moving_variance.op.name, 'BatchNorm/moving_variance')
+      self.assertEquals(moving_mean.op.name, 'BatchNorm/moving_mean')
+      self.assertEquals(moving_variance.op.name, 'BatchNorm/moving_variance')
 
   def testCreateVariablesWithoutCenterWithoutScale(self):
     height, width = 3, 3
@@ -523,13 +523,13 @@ class BatchNormTest(tf.test.TestCase):
       images = tf.random_uniform((5, height, width, 3), seed=1)
       ops.batch_norm(images, center=False, scale=False)
       beta = variables.get_variables_by_name('beta')
-      self.assertEqual(beta, [])
+      self.assertEquals(beta, [])
       gamma = variables.get_variables_by_name('gamma')
-      self.assertEqual(gamma, [])
+      self.assertEquals(gamma, [])
       moving_mean = tf.moving_average_variables()[0]
       moving_variance = tf.moving_average_variables()[1]
-      self.assertEqual(moving_mean.op.name, 'BatchNorm/moving_mean')
-      self.assertEqual(moving_variance.op.name, 'BatchNorm/moving_variance')
+      self.assertEquals(moving_mean.op.name, 'BatchNorm/moving_mean')
+      self.assertEquals(moving_variance.op.name, 'BatchNorm/moving_variance')
 
   def testMovingAverageVariables(self):
     height, width = 3, 3
@@ -538,8 +538,8 @@ class BatchNormTest(tf.test.TestCase):
       ops.batch_norm(images, scale=True)
       moving_mean = tf.moving_average_variables()[0]
       moving_variance = tf.moving_average_variables()[1]
-      self.assertEqual(moving_mean.op.name, 'BatchNorm/moving_mean')
-      self.assertEqual(moving_variance.op.name, 'BatchNorm/moving_variance')
+      self.assertEquals(moving_mean.op.name, 'BatchNorm/moving_mean')
+      self.assertEquals(moving_variance.op.name, 'BatchNorm/moving_variance')
 
   def testUpdateOps(self):
     height, width = 3, 3
@@ -549,9 +549,9 @@ class BatchNormTest(tf.test.TestCase):
       update_ops = tf.get_collection(ops.UPDATE_OPS_COLLECTION)
       update_moving_mean = update_ops[0]
       update_moving_variance = update_ops[1]
-      self.assertEqual(update_moving_mean.op.name,
+      self.assertEquals(update_moving_mean.op.name,
                         'BatchNorm/AssignMovingAvg')
-      self.assertEqual(update_moving_variance.op.name,
+      self.assertEquals(update_moving_variance.op.name,
                         'BatchNorm/AssignMovingAvg_1')
 
   def testReuseVariables(self):
@@ -562,19 +562,19 @@ class BatchNormTest(tf.test.TestCase):
       ops.batch_norm(images, scale=True, scope='bn', reuse=True)
       beta = variables.get_variables_by_name('beta')
       gamma = variables.get_variables_by_name('gamma')
-      self.assertEqual(len(beta), 1)
-      self.assertEqual(len(gamma), 1)
+      self.assertEquals(len(beta), 1)
+      self.assertEquals(len(gamma), 1)
       moving_vars = tf.get_collection('moving_vars')
-      self.assertEqual(len(moving_vars), 2)
+      self.assertEquals(len(moving_vars), 2)
 
   def testReuseUpdateOps(self):
     height, width = 3, 3
     with self.test_session():
       images = tf.random_uniform((5, height, width, 3), seed=1)
       ops.batch_norm(images, scope='bn')
-      self.assertEqual(len(tf.get_collection(ops.UPDATE_OPS_COLLECTION)), 2)
+      self.assertEquals(len(tf.get_collection(ops.UPDATE_OPS_COLLECTION)), 2)
       ops.batch_norm(images, scope='bn', reuse=True)
-      self.assertEqual(len(tf.get_collection(ops.UPDATE_OPS_COLLECTION)), 4)
+      self.assertEquals(len(tf.get_collection(ops.UPDATE_OPS_COLLECTION)), 4)
 
   def testCreateMovingVars(self):
     height, width = 3, 3
@@ -583,12 +583,12 @@ class BatchNormTest(tf.test.TestCase):
       _ = ops.batch_norm(images, moving_vars='moving_vars')
       moving_mean = tf.get_collection('moving_vars',
                                       'BatchNorm/moving_mean')
-      self.assertEqual(len(moving_mean), 1)
-      self.assertEqual(moving_mean[0].op.name, 'BatchNorm/moving_mean')
+      self.assertEquals(len(moving_mean), 1)
+      self.assertEquals(moving_mean[0].op.name, 'BatchNorm/moving_mean')
       moving_variance = tf.get_collection('moving_vars',
                                           'BatchNorm/moving_variance')
-      self.assertEqual(len(moving_variance), 1)
-      self.assertEqual(moving_variance[0].op.name, 'BatchNorm/moving_variance')
+      self.assertEquals(len(moving_variance), 1)
+      self.assertEquals(moving_variance[0].op.name, 'BatchNorm/moving_variance')
 
   def testComputeMovingVars(self):
     height, width = 3, 3

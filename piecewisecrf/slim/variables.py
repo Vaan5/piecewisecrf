@@ -78,15 +78,14 @@ with tf.Session() as sess:
   ...
 
 """
-
-
-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import tensorflow as tf
 
 from tensorflow.core.framework import graph_pb2
 from piecewisecrf.slim import scopes
-import collections
 
 # Collection containing all the variables created using slim.variables
 MODEL_VARIABLES = '_model_variables_'
@@ -210,7 +209,7 @@ class VariableDeviceChooser(object):
 # TODO(sguada) Remove once get_variable is able to colocate op.devices.
 def variable_device(device, name):
   """Fix the variable device to colocate its ops."""
-  if isinstance(device, collections.Callable):
+  if callable(device):
     var_name = tf.get_variable_scope().name + '/' + name
     var_def = graph_pb2.NodeDef(name=var_name, op='Variable')
     device = device(var_def)

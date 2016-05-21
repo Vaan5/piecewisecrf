@@ -11,7 +11,7 @@ import piecewisecrf.helpers.eval as eval_helper
 import piecewisecrf.datasets.reader as reader
 import piecewisecrf.helpers.mean_field as mean_field
 import piecewisecrf.models.piecewisecrf_model as model
-import piecewisecrf.datasets.cityscapes.prefs as prefs
+import piecewisecrf.config.prefs as prefs
 import piecewisecrf.datasets.helpers.pairwise_label_generator as indices
 
 FLAGS = prefs.flags.FLAGS
@@ -130,19 +130,21 @@ def train(dataset, resume_path=None):
                                         staircase=True)
 
         # Get images and labels for training and validation
-        image, labels_unary, labels_bin_sur, img_name = reader.inputs(dataset,
-                                                                      shuffle=True,
-                                                                      num_epochs=FLAGS.max_epochs,
-                                                                      dataset_partition='train')
-        image_val, labels_unary_val, labels_bin_sur_val, img_name_val = reader.inputs(dataset,
-                                                                                      shuffle=False,
-                                                                                      num_epochs=FLAGS.max_epochs,
-                                                                                      dataset_partition='validation')
+        image, labels_unary, labels_bin_sur, img_name = reader.inputs(
+            dataset,
+            shuffle=True,
+            num_epochs=FLAGS.max_epochs,
+            dataset_partition='train')
+        image_val, labels_unary_val, labels_bin_sur_val, img_name_val = reader.inputs(
+            dataset,
+            shuffle=False,
+            num_epochs=FLAGS.max_epochs,
+            dataset_partition='validation')
         image_train, labels_unary_train, labels_bin_sur_train, img_name_train = reader.inputs(
-                                                                                    dataset,
-                                                                                    shuffle=False,
-                                                                                    num_epochs=FLAGS.max_epochs,
-                                                                                    dataset_partition='train')
+            dataset,
+            shuffle=False,
+            num_epochs=FLAGS.max_epochs,
+            dataset_partition='train')
 
         # Build a Graph that computes the logits predictions from the
         # inference model.
@@ -162,7 +164,7 @@ def train(dataset, resume_path=None):
             unary_log_train, pairwise_log_train = model.inference(image_train, FLAGS.batch_size, is_training=False)
             # Calculate loss.
             loss_train = model.loss(unary_log_train, pairwise_log_train, labels_unary_train,
-                                  labels_bin_sur_train, FLAGS.batch_size, is_training=False)
+                                    labels_bin_sur_train, FLAGS.batch_size, is_training=False)
 
         # Add a summary to track the learning rate.
         tf.scalar_summary('learning_rate', lr)
@@ -223,8 +225,6 @@ def train(dataset, resume_path=None):
 
         ex_start_time = time.time()
         for epoch_num in range(1, FLAGS.max_epochs + 1):
-            conf_mat = np.zeros((FLAGS.num_classes, FLAGS.num_classes), dtype=np.uint64)
-
             for step in range(int(num_batches_per_epoch)):
                 start_time = time.time()
                 if step % 100 == 0:
@@ -267,11 +267,10 @@ def train(dataset, resume_path=None):
             train_loss = 0.0
             if FLAGS.evaluate_train_set:
                 train_loss, train_pixacc, train_iou, train_recall, train_precision = evaluate(
-                                                                            sess, unary_log_train,
-                                                                            pairwise_log_train, loss_train,
-                                                                            labels_unary_train, dataset,
-                                                                            dataset_partition='train'
-                                                                            )
+                    sess, unary_log_train,
+                    pairwise_log_train, loss_train,
+                    labels_unary_train, dataset,
+                    dataset_partition='train')
 
             # evaluate model on the validation set
             val_loss, val_pixacc, val_iou, recall, precision = evaluate(sess, unary_log_val,
