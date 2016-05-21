@@ -72,7 +72,7 @@ def main(argv=None):
         for batch in range(FLAGS.batch_size):
             s = mean_field.mean_field(logits_unary[batch, :, :, :],
                                       [(logits_pairwise[batch, :, :, :],
-                                       list(zip(indices.FIRST_INDICES_SURR, indices.SECOND_INDICES_SURR)),
+                                       list(zip(indices.FIRST_INDICES_AB, indices.SECOND_INDICES_AB)),
                                        indices.generate_encoding_decoding_dict(logits_unary.shape[3])[1]
                                         )],
                                       calculate_energy=args.calculate_energy)

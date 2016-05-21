@@ -100,7 +100,7 @@ def neg_log_likelihood(out_unary, out_binary, labels_unary, labels_binary, batch
     print('Loss: Negative Log Likelihood Loss')
     num_examples = (batch_size * FLAGS.img_height * FLAGS.img_width //
                     FLAGS.subsample_factor // FLAGS.subsample_factor)
-    num_neighbours = batch_size * indices.NUMBER_OF_NEIGHBOURS_SURR
+    num_neighbours = batch_size * indices.NUMBER_OF_NEIGHBOURS_AB
 
     with tf.op_scope([out_unary, out_binary, labels_unary, labels_binary], None, 'NegativeLogLikelyhood'):
         one_hot_labels_unary = tf.one_hot(tf.to_int64(labels_unary), FLAGS.num_classes, 1, 0)

@@ -98,7 +98,7 @@ def prepare_dataset(name):
         labels = skimage.transform.resize(labels, subslampled_size, order=0, preserve_range=True)
         labels = labels.astype(np.int32)
         labels_pairwise_surrounding = label_gen.generate_pairwise_labels(labels,
-                                                                         label_gen.get_indices_surrounding,
+                                                                         label_gen.get_indices_above_below,
                                                                          FLAGS.num_classes)
 
         rows = rgb.shape[0]

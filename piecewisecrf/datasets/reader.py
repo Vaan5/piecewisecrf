@@ -28,10 +28,7 @@ def read_and_decode(filename_queue):
     image = tf.reshape(image, shape=[FLAGS.img_height, FLAGS.img_width, FLAGS.img_depth])
     num_pixels = FLAGS.img_height * FLAGS.img_width // FLAGS.subsample_factor // FLAGS.subsample_factor
     labels_unary = tf.reshape(labels_unary, shape=[num_pixels])
-    num_neighbours = label_gen.get_number_of_all_neigbhours_surrounding(
-        FLAGS.img_height / FLAGS.subsample_factor,
-        FLAGS.img_width / FLAGS.subsample_factor,
-        FLAGS.surrounding_neighbourhood_size)
+    num_neighbours = label_gen.NUMBER_OF_NEIGHBOURS_AB
     labels_bin_sur = tf.reshape(labels_bin_sur, shape=[num_neighbours])
 
     return image, labels_unary, labels_bin_sur, img_name
