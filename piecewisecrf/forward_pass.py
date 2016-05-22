@@ -9,75 +9,67 @@ import skimage
 import skimage.data
 import skimage.transform
 
+import piecewisecrf.datasets.reader as reader
 import piecewisecrf.models.piecewisecrf_model as model
 import piecewisecrf.helpers.mean_field as mean_field
 import piecewisecrf.config.prefs as prefs
 import piecewisecrf.datasets.helpers.pairwise_label_generator as indices
+import piecewisecrf.helpers.io as io
 
 FLAGS = prefs.flags.FLAGS
 
 
-def draw_prediction(y, dataset, output_dir, img_name):
-    width = y.shape[1]
-    height = y.shape[0]
-    yimg = np.empty((height, width, 3), dtype=np.uint8)
-    for i in range(height):
-        for j in range(width):
-            yimg[i, j, :] = dataset.trainId2label.color
+def _create_dirs(output_dir):
+    '''
 
-    skimage.io.imsave(os.path.join(os.path.join(output_dir, 'png'), "{}.png".format(img_name)), yimg)
-    skimage.io.imsave(os.path.join(os.path.join(output_dir, 'ppm'), "{}.ppm".format(img_name)), yimg)
+    Creates necessary output directory hierarchy
 
+    Parameters:
+    -----------
+    output_dir: str
+        Path to the output directory
 
-def save_predictions(sess, image, dataset, partition, logits_unary, logits_pairwise, output_dir):
-    width = FLAGS.img_width
-    height = FLAGS.img_height
-    image_list = dataset.get_filenames(partition=partition)
+    Returns
+    -------
+    ret_val: list
+        List of paths to generated directories
 
-    for i in trange(len(image_list)):
-        img = skimage.data.load(image_list[i])
-        img = img.astype(np.float32)
-
-        for c in range(3):
-            img[:, :, c] -= img[:, :, c].mean()
-            img[:, :, c] /= img[:, :, c].std()
-
-    img_data = img.reshape(1, height, width, 3)
-    out_unary, out_pairwise = sess.run([logits_unary, logits_pairwise], feed_dict={image: img_data})
-
-    s = mean_field.mean_field(out_unary[0, :, :, :],
-                              [(out_pairwise[0, :, :, :],
-                               list(zip(indices.FIRST_INDICES_SURR, indices.SECOND_INDICES_SURR)),
-                               indices.generate_encoding_decoding_dict(out_unary.shape[3])[1]
-                                )])
-    id_img = s.argmax(2).astype(np.int32, copy=False)
-
+    '''
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    if not os.path.exists(os.path.join(output_dir, 'ppm')):
-        os.makedirs(os.path.join(output_dir, 'ppm'))
-    if not os.path.exists(os.path.join(output_dir, 'png')):
-        os.makedirs(os.path.join(output_dir, 'png'))
+    potentials_out_small = os.path.join(output_dir, 'unary_small')
+    potentials_out_orig = os.path.join(output_dir, 'unary')
+    prediction_out_small = os.path.join(output_dir, 'out_small')
+    prediction_out = os.path.join(output_dir, 'out')
+    prediction_ppm_out_small = os.path.join(output_dir, 'out_ppm_small')
+    prediction_ppm_out = os.path.join(output_dir, 'out_ppm')
 
-    img_name = image_list[i][image_list[i].rfind('/') + 1:]
-    img_name = img_name[0:-4]
-    draw_prediction(id_img, dataset, output_dir, img_name)
+    ret_val = [potentials_out_small, potentials_out_orig, prediction_out_small,
+               prediction_out, prediction_ppm_out_small, prediction_ppm_out]
+
+    for path in ret_val:
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+    return ret_val
 
 
 def main(argv=None):
     '''
-    Generates images for the given dataset
+
+    Creates output files for the given dataset
+
     '''
     possible_datasets = ['cityscapes', 'kitti']
-    parser = argparse.ArgumentParser(description='Generates images for the given dataset')
+    parser = argparse.ArgumentParser(description='Evaluates trained model on given dataset')
     parser.add_argument('dataset_name', type=str, choices=possible_datasets,
                         help='Name of the dataset used for training')
     parser.add_argument('dataset_partition', type=str, choices=['train', 'validation', 'test'],
                         help='Dataset partition which will be evaluated')
+    parser.add_argument('checkpoint_dir', type=str,
+                        help='Path to the directory containing the trained model')
     parser.add_argument('output_dir', type=str, help='Output directory')
-    parser.add_argument('model_checkpoint_path', type=str,
-                        help='Path to the trained model file - model.ckpt')
 
     args = parser.parse_args()
 
@@ -92,20 +84,68 @@ def main(argv=None):
                                val_dir=FLAGS.val_records_dir,
                                test_dir=FLAGS.test_records_dir)
 
-    with tf.Graph().as_default():
-        sess = tf.Session()
+    if not os.path.exists(args.checkpoint_dir):
+        print('{} was not found'.format(args.checkpoint_dir))
+        exit(1)
 
-        batch_shape = (FLAGS.batch_size, FLAGS.img_height, FLAGS.img_width, FLAGS.img_depth)
-        image = tf.placeholder(tf.float32, shape=batch_shape)
+    (potentials_out_small, potentials_out_orig, prediction_out_small,
+        prediction_out, prediction_ppm_out_small, prediction_ppm_out) = _create_dirs(args.output_dir)
 
-        # Restores from checkpoint
-        with tf.Session() as sess:
-            with tf.variable_scope("model"):
-                unary_log, pairwise_log = model.inference(image, FLAGS.batch_size, is_training=False)
+    ckpt = tf.train.get_checkpoint_state(args.checkpoint_dir)
+    sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False))
+    if ckpt and ckpt.model_checkpoint_path:
+        with tf.variable_scope('model'):
+            image, labels_unary, labels_bin_sur, img_name = reader.inputs(dataset,
+                                                                          shuffle=False,
+                                                                          dataset_partition=args.dataset_partition)
+            unary_log, pairwise_log = model.inference(image, FLAGS.batch_size, is_training=False)
 
-            saver = tf.train.Saver()
-            saver.restore(sess, args.model_checkpoint_path)
-            save_predictions(sess, image, dataset, args.dataset_partition, unary_log, pairwise_log, args.output_dir)
+        saver = tf.train.Saver()
+        print('Loading model: {}'.format(ckpt.model_checkpoint_path))
+        saver.restore(sess, ckpt.model_checkpoint_path)
+    else:
+        print('No checkpoint file found')
+        raise ValueError()
+
+    tf.train.start_queue_runners(sess=sess)
+    for i in trange(dataset.num_examples(args.dataset_partition) // FLAGS.batch_size):
+        logits_unary, logits_pairwise, yt, names = sess.run([unary_log, pairwise_log, labels_unary, img_name])
+
+        for batch in range(FLAGS.batch_size):
+            print(names[batch])
+            s = mean_field.mean_field(logits_unary[batch, :, :, :],
+                                      [(logits_pairwise[batch, :, :, :],
+                                       list(zip(indices.FIRST_INDICES_SURR, indices.SECOND_INDICES_SURR)),
+                                       indices.generate_encoding_decoding_dict(logits_unary.shape[3])[1]
+                                        )],
+                                      calculate_energy=args.calculate_energy)
+
+            y = s.argmax(2)
+            y = y.astype(np.int16)
+            io.dump_nparray(y, os.path.join(prediction_out_small, "{}.bin".format(names[batch])))
+            y_orig = skimage.transform.resize(y, (FLAGS.img_height, FLAGS.img_width), order=0, preserve_range=True)
+            y_orig = y_orig.astype(np.int16)
+            io.dump_nparray(y_orig, os.path.join(prediction_out, "{}.bin".format(names[batch])))
+
+            yimg = np.empty((y.shape[0], y.shape[1], 3), dtype=np.uint8)
+            for i in range(y.shape[0]):
+                for j in range(y.shape[1]):
+                    yimg[i, j, :] = dataset.trainId2label[y[i, j]].color
+
+            skimage.io.imsave(os.path.join(prediction_ppm_out_small, "{}.ppm".format(names[batch])), yimg)
+            yimg_orig = skimage.transform.resize(yimg, (FLAGS.img_height, FLAGS.img_width),
+                                                 order=0, preserve_range=True)
+            yimg_orig = yimg_orig.astype(np.int16)
+            skimage.io.imsave(os.path.join(prediction_ppm_out, "{}.ppm".format(names[batch])), yimg)
+
+            ret = -1.0 * np.log(s)
+            ret = ret.astype(np.float32)
+            io.dump_nparray(ret, os.path.join(potentials_out_small, "{}.bin".format(names[batch])))
+
+            ret = np.repeat(np.repeat(s, FLAGS.subsample_factor, axis=0), FLAGS.subsample_factor, axis=1)
+            ret = -1. * np.log(ret)
+            ret = ret.astype(np.float32)
+            io.dump_nparray(ret, os.path.join(potentials_out_orig, "{}.bin".format(names[batch])))
 
 
 if __name__ == '__main__':
