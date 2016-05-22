@@ -222,7 +222,8 @@ def inference(inputs, batch_size, is_training=True):
                 net2 = convolve(net2, conv6_sz, k, 'conv6_2_2')
                 featmap2 = convolve(net2, conv6_sz, k, 'conv6_3_2')
 
-            inputs_up = tf.image.resize_images(inputs, int(0.9 * FLAGS.img_height), int(0.9 * FLAGS.img_width))
+            inputs_up = tf.image.resize_images(inputs, int(FLAGS.max_scale * FLAGS.img_height),
+                                               int(FLAGS.max_scale * FLAGS.img_width))
             with tf.variable_scope('vgg', reuse=True):
                 net3 = convolve(inputs_up, conv1_sz, k, 'conv1_1', vgg_layers)
                 net3 = convolve(net3, conv1_sz, k, 'conv1_2', vgg_layers)
@@ -250,11 +251,11 @@ def inference(inputs, batch_size, is_training=True):
                 featmap3 = convolve(net3, conv6_sz, k, 'conv6_3_3')
 
             # concatenate featmaps
-            featmap1_shape = featmap1.get_shape()
-            resize_shape = [featmap1_shape[1].value, featmap1_shape[2].value]
-            f1_up = tf.image.resize_bilinear(featmap2, resize_shape)
-            f2_up = tf.image.resize_bilinear(featmap3, resize_shape)
-            featmap = tf.concat(3, [f1_up, f2_up, featmap1])
+            featmap3_shape = featmap3.get_shape()
+            resize_shape = [featmap3_shape[1].value, featmap3_shape[2].value]
+            f1_up = tf.image.resize_bilinear(featmap1, resize_shape)
+            f2_up = tf.image.resize_bilinear(featmap2, resize_shape)
+            featmap = tf.concat(3, [f1_up, f2_up, featmap3])
 
             # Additional block
             with scopes.arg_scope([ops.conv2d], batch_norm_params=bn_params):

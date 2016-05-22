@@ -82,8 +82,8 @@ def get_indices_surrounding():
     '''
     container = []
     original_container = []
-    h = int(FLAGS.img_height / FLAGS.subsample_factor)
-    w = int(FLAGS.img_width / FLAGS.subsample_factor)
+    h = int(FLAGS.img_height / FLAGS.subsample_factor * FLAGS.max_scale)
+    w = int(FLAGS.img_width / FLAGS.subsample_factor * FLAGS.max_scale)
     nsize = FLAGS.surrounding_neighbourhood_size
     nsize_half = int(nsize / 2)
     for i in range(h):
@@ -125,8 +125,8 @@ def get_number_of_all_neigbhours_surrounding(h, w, nsize):
 FIRST_INDICES_SURR, SECOND_INDICES_SURR = get_indices_surrounding()
 
 NUMBER_OF_NEIGHBOURS_SURR = get_number_of_all_neigbhours_surrounding(
-    FLAGS.img_height / FLAGS.subsample_factor,
-    FLAGS.img_width / FLAGS.subsample_factor,
+    int(FLAGS.img_height / FLAGS.subsample_factor * FLAGS.max_scale),
+    int(FLAGS.img_width / FLAGS.subsample_factor * FLAGS.max_scale),
     FLAGS.surrounding_neighbourhood_size
 )
 
@@ -151,8 +151,8 @@ def get_indices_above_below():
     '''
     container = []
     original_container = []
-    h = int(FLAGS.img_height / FLAGS.subsample_factor)
-    w = int(FLAGS.img_width / FLAGS.subsample_factor)
+    h = int(FLAGS.img_height / FLAGS.subsample_factor * FLAGS.max_scale)
+    w = int(FLAGS.img_width / FLAGS.subsample_factor * FLAGS.max_scale)
     nsize_width = FLAGS.neigbourhood_above_below_width
     nsize_height = FLAGS.neigbourhood_above_below_height
     nsize_width_half = int(nsize_width / 2)
@@ -195,8 +195,8 @@ def get_number_of_all_neigbhours_above_below(h, w, nsize_height, nsize_width):
 FIRST_INDICES_AB, SECOND_INDICES_AB = get_indices_above_below()
 
 NUMBER_OF_NEIGHBOURS_AB = get_number_of_all_neigbhours_above_below(
-    FLAGS.img_height / FLAGS.subsample_factor,
-    FLAGS.img_width / FLAGS.subsample_factor,
+    int(FLAGS.img_height / FLAGS.subsample_factor * FLAGS.max_scale),
+    int(FLAGS.img_width / FLAGS.subsample_factor * FLAGS.max_scale),
     FLAGS.neigbourhood_above_below_height,
     FLAGS.neigbourhood_above_below_width
 )

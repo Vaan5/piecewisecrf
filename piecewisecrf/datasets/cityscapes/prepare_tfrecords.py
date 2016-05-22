@@ -55,7 +55,8 @@ def prepare_dataset(name):
 
         labels = io.load_nparray_from_bin_file(os.path.join(gt_dir, '{}.bin'.format(img_prefix)), np.uint8)
         # don't know if this resizing is okay - TODO
-        subslampled_size = (labels.shape[0] / FLAGS.subsample_factor, labels.shape[1] / FLAGS.subsample_factor)
+        subslampled_size = (labels.shape[0] / FLAGS.subsample_factor * FLAGS.max_scale,
+                            labels.shape[1] / FLAGS.subsample_factor * FLAGS.max_scale)
         labels = skimage.transform.resize(labels, subslampled_size, order=0, preserve_range=True)
         labels = labels.astype(np.int32)  # likely not needed
         labels_pairwise_surrounding = label_gen.generate_pairwise_labels(labels,

@@ -64,3 +64,5 @@ flags.DEFINE_integer('neigbourhood_above_below_width', 3,
                      'Width of the above/below neighbourhood')
 flags.DEFINE_integer('neigbourhood_above_below_height', 3,
                      'Height of the above/below neighbourhood')
+
+flags.DEFINE_float('max_scale', 1, 'Maximum scale factor')
