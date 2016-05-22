@@ -4,6 +4,8 @@ TODO UPDATE
 
 Instructions
 
+Generating images
+
 
 References
 
