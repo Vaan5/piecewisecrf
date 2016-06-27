@@ -172,7 +172,7 @@ def main(img_input_dir, label_input_dir, output_dir, subset, resize,
 
             binary_image = np.apply_along_axis(lambda a: dataset.color2label[(a[0], a[1], a[2])].trainId, 2, img)
             binary_image = binary_image.astype(np.uint8)
-            io.dump_nparray(binary_image, os.path.join(label_dest_ppm_dir, '{}.bin'.format(file_prefix)))
+            io.dump_nparray(binary_image, os.path.join(label_dest_bin_dir, '{}.bin'.format(file_prefix)))
 
         if resize:
             img = skimage.transform.resize(img, (resize[1], resize[0]), order=0, preserve_range=True)
@@ -196,7 +196,7 @@ if __name__ == '__main__':
     parser.add_argument('output_dir', type=str, help='Destination directory')
     parser.add_argument('subset', type=str, help='Subset for which files are generated')
     parser.add_argument('--resize', nargs=2, type=int, help='Width and height of the resized image')
-    parser.add_argument('--onlyresize', type=bool, help='Used if only the resized files are going to be generated')
+    parser.add_argument('--onlyresize', dest='onlyresize', action='store_true', help='Used if only the resized files are going to be generated')
     parser.add_argument('--containsl', nargs=1, type=str, help='String that each label file contains '
                         '(useful if label_input_dir is not homogenous)')
     parser.add_argument('--replacel', nargs=2, type=str, help='String (first argument) in label file name '

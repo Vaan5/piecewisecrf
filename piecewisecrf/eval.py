@@ -3,6 +3,7 @@ import os
 
 import tensorflow as tf
 import numpy as np
+import scipy.ndimage
 from tqdm import trange
 
 import piecewisecrf.datasets.reader as reader
@@ -51,10 +52,12 @@ def main(argv=None):
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False))
     if ckpt and ckpt.model_checkpoint_path:
         with tf.variable_scope('model'):
-            image, labels_unary, labels_bin_sur, img_name = reader.inputs(dataset,
-                                                                          shuffle=False,
-                                                                          dataset_partition=args.dataset_partition)
-            unary_log, pairwise_log = model.inference(image, FLAGS.batch_size, is_training=False)
+            (image, labels_unary, lo, labels_bin_sur,
+                labels_bin_above_below, img_name, weights,
+                weights_surr, weights_ab) = reader.inputs(dataset,
+                                                          shuffle=False,
+                                                          dataset_partition=args.dataset_partition)
+            unary_log, pairwise_log, pairwise_ab_log = model.inference(image, FLAGS.batch_size, is_training=False)
 
         saver = tf.train.Saver()
         print('Loading model: {}'.format(ckpt.model_checkpoint_path))
@@ -67,15 +70,22 @@ def main(argv=None):
     conf_mat_without_mf = np.zeros((FLAGS.num_classes, FLAGS.num_classes), dtype=np.uint64)
     tf.train.start_queue_runners(sess=sess)
     for i in trange(dataset.num_examples(args.dataset_partition) // FLAGS.batch_size):
-        logits_unary, logits_pairwise, yt, names = sess.run([unary_log, pairwise_log, labels_unary, img_name])
+        logits_unary, logits_pairwise, logits_pairwise_ab, yt, names = sess.run([unary_log, pairwise_log,
+                                                                                 pairwise_ab_log, lo, img_name])
 
         for batch in range(FLAGS.batch_size):
             s = mean_field.mean_field(logits_unary[batch, :, :, :],
                                       [(logits_pairwise[batch, :, :, :],
                                        list(zip(indices.FIRST_INDICES_SURR, indices.SECOND_INDICES_SURR)),
                                        indices.generate_encoding_decoding_dict(logits_unary.shape[3])[1]
-                                        )],
+                                        ),
+                                      (logits_pairwise_ab[batch, :, :, :],
+                                       list(zip(indices.FIRST_INDICES_AB, indices.SECOND_INDICES_AB)),
+                                       indices.generate_encoding_decoding_dict(logits_unary.shape[3])[1]
+                                       )],
                                       calculate_energy=args.calculate_energy)
+            s = scipy.ndimage.zoom(s, [16, 16, 1], order=1)
+            logits_unary = scipy.ndimage.zoom(logits_unary, [1, 16, 16, 1], order=1)
             yk = logits_unary[batch].argmax(2)
             y = s.argmax(2)
             eval_helper.confusion_matrix(y.reshape(-1), yt[batch], conf_mat, dataset.num_classes())

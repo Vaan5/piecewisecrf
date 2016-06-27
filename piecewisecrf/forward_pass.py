@@ -9,6 +9,8 @@ import skimage
 import skimage.data
 import skimage.transform
 
+import scipy.ndimage
+
 import piecewisecrf.datasets.reader as reader
 import piecewisecrf.models.piecewisecrf_model as model
 import piecewisecrf.helpers.mean_field as mean_field
@@ -95,10 +97,12 @@ def main(argv=None):
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False))
     if ckpt and ckpt.model_checkpoint_path:
         with tf.variable_scope('model'):
-            image, labels_unary, labels_bin_sur, img_name = reader.inputs(dataset,
-                                                                          shuffle=False,
-                                                                          dataset_partition=args.dataset_partition)
-            unary_log, pairwise_log = model.inference(image, FLAGS.batch_size, is_training=False)
+            (image, labels_unary, labels_orig,
+                labels_bin_sur, labels_bin_above_below,
+                img_name, weights, weights_surr, weights_ab) = reader.inputs(dataset,
+                                                                             shuffle=False,
+                                                                             dataset_partition=args.dataset_partition)
+            unary_log, pairwise_log, pairwise_ab_log = model.inference(image, FLAGS.batch_size, is_training=False)
 
         saver = tf.train.Saver()
         print('Loading model: {}'.format(ckpt.model_checkpoint_path))
@@ -108,18 +112,26 @@ def main(argv=None):
         raise ValueError()
 
     tf.train.start_queue_runners(sess=sess)
+    print(dataset.num_examples(args.dataset_partition) // FLAGS.batch_size)
     for i in trange(dataset.num_examples(args.dataset_partition) // FLAGS.batch_size):
-        logits_unary, logits_pairwise, yt, names = sess.run([unary_log, pairwise_log, labels_unary, img_name])
+        logits_unary, logits_pairwise, logits_pairwise_ab, yt, names = sess.run([unary_log, pairwise_log,
+                                                                                 pairwise_ab_log, labels_unary,
+                                                                                 img_name])
 
         for batch in range(FLAGS.batch_size):
             print(names[batch])
+            names[batch] = names[batch].decode("utf-8")
             s = mean_field.mean_field(logits_unary[batch, :, :, :],
                                       [(logits_pairwise[batch, :, :, :],
                                        list(zip(indices.FIRST_INDICES_SURR, indices.SECOND_INDICES_SURR)),
                                        indices.generate_encoding_decoding_dict(logits_unary.shape[3])[1]
-                                        )],
-                                      calculate_energy=args.calculate_energy)
-
+                                        ),
+                                       (logits_pairwise_ab[batch, :, :, :],
+                                       list(zip(indices.FIRST_INDICES_AB, indices.SECOND_INDICES_AB)),
+                                       indices.generate_encoding_decoding_dict(logits_unary.shape[3])[1]
+                                        )
+                                       ])
+            s = mean_field._exp_norm(s)
             y = s.argmax(2)
             y = y.astype(np.int16)
             io.dump_nparray(y, os.path.join(prediction_out_small, "{}.bin".format(names[batch])))
@@ -136,13 +148,14 @@ def main(argv=None):
             yimg_orig = skimage.transform.resize(yimg, (FLAGS.img_height, FLAGS.img_width),
                                                  order=0, preserve_range=True)
             yimg_orig = yimg_orig.astype(np.int16)
-            skimage.io.imsave(os.path.join(prediction_ppm_out, "{}.ppm".format(names[batch])), yimg)
+            skimage.io.imsave(os.path.join(prediction_ppm_out, "{}.ppm".format(names[batch])), yimg_orig)
 
             ret = -1.0 * np.log(s)
             ret = ret.astype(np.float32)
             io.dump_nparray(ret, os.path.join(potentials_out_small, "{}.bin".format(names[batch])))
 
-            ret = np.repeat(np.repeat(s, FLAGS.subsample_factor, axis=0), FLAGS.subsample_factor, axis=1)
+            # ret = np.repeat(np.repeat(s, FLAGS.subsample_factor, axis=0), FLAGS.subsample_factor, axis=1)
+            ret = scipy.ndimage.zoom(s, [16, 16, 1], order=1)
             ret = -1. * np.log(ret)
             ret = ret.astype(np.float32)
             io.dump_nparray(ret, os.path.join(potentials_out_orig, "{}.bin".format(names[batch])))

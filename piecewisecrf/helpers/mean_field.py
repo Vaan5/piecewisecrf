@@ -82,7 +82,7 @@ def mean_field(unary, pairwise, number_of_iterations=3, calculate_energy=False):
     # initialize marginals to unary potentials
     marginals = np.zeros(unary.shape)
     np.copyto(marginals, -1.0 * unary)
-    marginals = marginals.astype(np.float128)
+    marginals = marginals.astype(np.float)
     marginals = _exp_norm(marginals)
 
     if calculate_energy:
@@ -94,14 +94,15 @@ def mean_field(unary, pairwise, number_of_iterations=3, calculate_energy=False):
         # print("Mean-Field iteration #{}".format(it_num + 1))
         tmp_marginals = np.zeros(marginals.shape)
         np.copyto(tmp_marginals, -1.0 * unary)
-        tmp_marginals = tmp_marginals.astype(np.float128)
+        tmp_marginals = tmp_marginals.astype(np.float)
         for ind, (p, zipped_indices, decoding) in enumerate(pairwise):
             for i, (f, s) in enumerate(zipped_indices):
                 tmp_marginals[f // width, f % width, :] -= pairwise3d[ind][i].dot(marginals[s // width, s % width, :])
+                tmp_marginals[s // width, s % width, :] -= marginals[f // width, f % width, :].dot(pairwise3d[ind][i])
 
         tmp_marginals = _exp_norm(tmp_marginals)
         np.copyto(marginals, tmp_marginals)
-        marginals = marginals.astype(np.float128)
+        marginals = marginals.astype(np.float)
 
         if calculate_energy:
             pairwise_list = [(-1.0 * pair.reshape([-1, number_of_classes ** 2]), zipped_indices, decoding)

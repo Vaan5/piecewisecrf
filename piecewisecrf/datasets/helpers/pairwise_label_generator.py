@@ -63,7 +63,7 @@ def generate_pairwise_labels(labels, indices_getter, number_of_labels):
 
 
 #######################################################################################################################
-####                             Pairwise potentials modelling above/below relations                               ####
+#                                Pairwise potentials modelling surrounding relations                                  #
 #######################################################################################################################
 
 
@@ -131,9 +131,9 @@ NUMBER_OF_NEIGHBOURS_SURR = get_number_of_all_neigbhours_surrounding(
 )
 
 
-#############################################################
-###  Pairwise potentials modelling above/below relations  ###
-#############################################################
+#######################################################################################################################
+#                                Pairwise potentials modelling above/below relations                                  #
+#######################################################################################################################
 
 
 def get_indices_above_below():
@@ -159,7 +159,7 @@ def get_indices_above_below():
     for i in range(h):
         for j in range(w):
             index_1d = i * w + j
-            for n_i in range(i - nsize_height + 1, i):
+            for n_i in range(i - nsize_height, i):
                 for n_j in range(j - nsize_width_half, j + nsize_width_half + 1):
                     if n_i < 0 or n_i >= h or n_j < 0 or n_j >= w or (n_i == i and n_j == j):
                         continue
@@ -184,7 +184,7 @@ def get_number_of_all_neigbhours_above_below(h, w, nsize_height, nsize_width):
     nsize_width_half = int(nsize_width / 2)
     for i in range(int(h)):
         for j in range(int(w)):
-            for n_i in range(i - nsize_height + 1, i):
+            for n_i in range(i - nsize_height, i):
                 for n_j in range(j - nsize_width_half, j + nsize_width_half + 1):
                     if n_i < 0 or n_i >= h or n_j < 0 or n_j >= w or (n_i == i and n_j == j):
                         continue
