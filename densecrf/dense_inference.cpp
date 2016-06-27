@@ -184,7 +184,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	int M;
-	if (argv[1] == "kitti") {
+	if (std::string(argv[1]) == "kitti") {
 		M = 11;
 	} else {
 		M = 19;
