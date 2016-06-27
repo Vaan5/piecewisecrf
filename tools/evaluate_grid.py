@@ -29,8 +29,18 @@ if __name__ == '__main__':
                                      "(in case of redirecting output to file) - synchronized print")
     parser.add_argument('input_dir', type=str, help="Path to the temp_dir from grid_search")
     parser.add_argument('labels_dir', type=str, help="Path to labels directory")
+    possible_datasets = ['cityscapes', 'kitti']
+    parser.add_argument('dataset_name', type=str, choices=possible_datasets,
+                        help='Name of the dataset used for evaluation')
 
     args = parser.parse_args()
+
+    if args.dataset_name == possible_datasets[0]:
+        from piecewisecrf.datasets.cityscapes.cityscapes import CityscapesDataset
+        dataset = CityscapesDataset()
+    elif args.dataset_name == possible_datasets[1]:
+        from piecewisecrf.datasets.kitti.kitti import KittiDataset
+        dataset = KittiDataset()
 
     with open('evaluation.txt', "w") as ff:
         best_iou = 0
@@ -41,7 +51,7 @@ if __name__ == '__main__':
             ff.write(directory + "\n")
             print(directory)
             r = calculate_accuracy_t.evaluate_segmentation(os.path.join(args.input_dir,
-                                                                        directory), args.labels_dir)
+                                                                        directory), args.labels_dir, dataset)
             ff.write("#{} => {} - {}\n".format(directory, r[5], r[3]))
             print("#{} => {} - {}\n".format(directory, r[5], r[3]))
             if r[5] > best_iou:

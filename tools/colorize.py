@@ -32,9 +32,9 @@ def main(input_, output_, dataset):
             a = io.load_nparray_from_bin_file(os.path.join(input_, file), np.int16)
             img = np.zeros((a.shape[0], a.shape[1], 3))
 
-            for i in xrange(a.shape[0]):
-                for j in xrange(a.shape[1]):
-                    img[i, j, :] = dataset.labels.trainId2label[a[i, j]].color
+            for i in range(a.shape[0]):
+                for j in range(a.shape[1]):
+                    img[i, j, :] = dataset.trainId2label[a[i, j]].color
 
             img = Image.fromarray(img.astype(np.uint8))
             img.save(os.path.join(output_, file[0:-3] + 'ppm'))

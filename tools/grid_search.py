@@ -36,6 +36,7 @@ def run_crf(exe, dataset, zipped_input, temp_dir, unary_dir, smoothness_theta, s
     '''
     for filename, filepath in zipped_input:
         subprocess.call([exe,
+                         dataset,
                          filepath,
                          os.path.join(unary_dir, '{}.bin'.format(filename)),
                          os.path.join(temp_dir, '{}.bin'.format(filename)),

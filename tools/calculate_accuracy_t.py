@@ -156,18 +156,22 @@ def evaluate_segmentation(predictions_dir, labels_dir, dataset):
 
     tpfn = np.sum(np.concatenate([aggregated_stats_class[0][None],
                                   aggregated_stats_class[2][None]], axis=0), axis=0)
+    tpfp = np.sum(np.concatenate([aggregated_stats_class[0][None],
+                                  aggregated_stats_class[1][None]], axis=0), axis=0)
 
-    real_per_class_accuracy = aggregated_stats_class[0] / tpfn                                  # [c]
-    per_class_accuracy = aggregated_stats_class[0] / np.sum(aggregated_stats_class, axis=0)     # [c]
+    recall_per_class = aggregated_stats_class[0] / tpfn                                  # [c]
+    precision_per_class = aggregated_stats_class[0] / tpfp                                  # [c]
+    per_class_iou = aggregated_stats_class[0] / np.sum(aggregated_stats_class, axis=0)     # [c]
+    per_class_iou = np.nan_to_num(per_class_iou)
 
     aggregated_stats_all = np.sum(aggregated_stats_class, axis=1)                               # [3]
-    per_pixel_accuracy = aggregated_stats_all[0] / np.sum(aggregated_stats_all)
+    per_pixel_accuracy = aggregated_stats_all[0] / (aggregated_stats_all[0] + aggregated_stats_all[1])
 
     real_per_pixel_accuracy = aggregated_stats_all[0] / (aggregated_stats_all[0] + aggregated_stats_all[2])
-    iou = 100 * np.mean(per_class_accuracy)
+    iou = 100.0 * per_class_iou.mean()
 
-    return [per_class_accuracy, per_pixel_accuracy, segmentation_stats,
-            real_per_pixel_accuracy, real_per_class_accuracy, iou]
+    return [per_class_iou, per_pixel_accuracy, segmentation_stats,
+            precision_per_class, recall_per_class, iou]
 
 
 if __name__ == '__main__':
@@ -192,6 +196,7 @@ if __name__ == '__main__':
     results = evaluate_segmentation(args.predictions_dir, args.labels_dir, dataset)
 
     print('IoU = {:.2f}'.format(results[5]))
-    print('Pixel Accuracy = {:.2f}'.format(100 * results[3]))
-    print('Mean class accuracy = {:.2f}'.format(100 * np.mean(results[4])))
-    print('Per class accuracy = {}'.format(results[4]))
+    print('Pixel Accuracy = {:.2f}'.format(100 * results[1]))
+    print('Recall = {:.2f}'.format(100 * results[4].mean()))
+    print('Precision = {}'.format(100 * results[3].mean()))
+    print('Per class IOU = {}'.format(100.0 * results[0]))
