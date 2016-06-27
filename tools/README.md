@@ -23,4 +23,10 @@ search_ranges = {
 }
 ```
 
+In the file search ranges are described as python lists. The parameters are as follows:
 
+- `smoothness_theta` - smoothness kernel parameter
+- `smoothness_w` - smoothness kernel weight
+- `appearance_theta_rgb` - appearance kernel parameter (for pixel colors)
+- `appearance_theta_pos` - appearance kernel parameter (for pixel positions)
+- `appearance_w` - appearance kernel weight
