@@ -133,8 +133,27 @@ flags.DEFINE_integer('subsample_factor', 16, 'Subsample factor of the model')
 
 In order to change a parameter, the user needs to modify the second argument in the `DEFINE_xxx` call. All parameters are well documented in the preferences file, but the more important onces are highlighted here:
 
-- `smoothness_theta` - smoothness kernel parameter
-- `smoothness_w` - smoothness kernel weight
-- `appearance_theta_rgb` - appearance kernel parameter (for pixel colors)
-- `appearance_theta_pos` - appearance kernel parameter (for pixel positions)
-- `appearance_w` - appearance kernel weight
+- binary potentials definitions
+  - `surrounding_neighbourhood_size` - size of the surrounding neighbourhood
+  - `neigbourhood_above_below_width` - width of the above/below neighbourhood
+  - `neigbourhood_above_below_height` - height of the above/below neighbourhood
+- training parameters
+  - `reg_factor` - regularization factor
+  - `initial_learning_rate` - initial learning rate
+  - `learning_rate_decay_factor` - learning rate decay factor
+  - `num_epochs_per_decay` - number of epochs during which the learning rate is constant
+  - `max_epochs` - maximum number of epochs used for training
+- file directories
+  - `dataset_dir` - path to the directory containing folders created with `prepare_dataset_files.py` script
+  - `save_dir` - destination directory for tensorflow records (`prepare_tfrecords.py` will save tensorflow records in that directory)
+  - `vgg_init_file` - path to the vgg parameters file created with [caffe-tensorflow](https://github.com/ethereon/caffe-tensorflow)
+  - `train_dir` - destination directory where the trained model will be saved
+  - `train_records_dir` - path to the directory containing training tensorflow records
+  - `val_records_dir` - path to the directory containing validation tensorflow records
+  - `test_records_dir` - path to the directory containing test tensorflow records
+- other parameters
+  - `img_width`, `img_height` - resized image dimensions (used because of memory limitations)
+  - `num_classes` - number of classes in the dataset
+
+# Usage
+Usage instruction for the important scripts in this folder are given in the main README file. For other usage instructions the user is advised to look at the usage comments inside the python scripts.
