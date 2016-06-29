@@ -6,11 +6,11 @@ This is the publicly available converter [caffe-tensorflow](https://github.com/e
 
 Run `convert.py` to convert an existing Caffe model to TensorFlow.
 
-Make sure you're using the latest Caffe format (see the notes section for more info).
+Make sure you're using the latest Caffe format.
 
 The output consists of two files:
 
-1. A data file (in NumPy's native format) containing the model's learned parameters.
+1. A data file (in NumPy's native format) containing the model's learned parameters. (This is used in piecewisecrf training)
 2. A Python class that constructs the model's graph.
 
 # Converting VGG16
