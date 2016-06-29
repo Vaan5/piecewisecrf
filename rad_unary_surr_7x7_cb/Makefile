@@ -1,0 +1,2 @@
+all:
+	@g++ densecrf/dense_inference.cpp densecrf/bipartitedensecrf.cpp densecrf/densecrf.cpp densecrf/filter.cpp densecrf/permutohedral.cpp densecrf/probimage.cpp densecrf/util.cpp -o DenseCRFv1.out -O2 -std=c++11 -Wall
