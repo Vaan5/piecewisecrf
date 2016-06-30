@@ -27,15 +27,15 @@ The first step is to generate all the necessary files used for training and vali
 ### Training the neural network
 
 1. Prepare the numpy file with vgg weights (look at the readme in caffe-tensorflow).
-2. Configure the `piecewisecrf/datasets/cityscapes/train_validation_split.py` (`vgg_init_file, train_dir` and all the other parameters for training)
+2. Configure the `piecewisecrf/config/prefs.py` (`vgg_init_file, train_dir` and all the other parameters for training)
 3. Run `piecewisecrf/train.py`
 
 ### Evaluating the neural network
-1. Configure the `piecewisecrf/datasets/cityscapes/train_validation_split.py` if not already done.
+1. Configure the `piecewisecrf/config/prefs.py` if not already done.
 2. Run the following script: `piecewisecrf/eval.py`
 
 ### Generating output files from contextual CRF
-1. Configure the `piecewisecrf/datasets/cityscapes/train_validation_split.py` if not already done.
+1. Configure the `piecewisecrf/config/prefs.py` if not already done.
 2. Run the following script: `piecewisecrf/forward_pass.py`
 
 This will generate predictions (in small and original resolution) as well as unary potentials used by the fully connected CRF.
