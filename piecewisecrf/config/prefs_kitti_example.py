@@ -70,7 +70,7 @@ tf.app.flags.DEFINE_string('val_records_dir',
                            '/home/dcausevic/datasets/kitti_608x192_vel_all/train_val/608x192/tfrecords/',
                            'Path to the directory containing training tfrecords')
 tf.app.flags.DEFINE_string('test_records_dir',
-                           '/home/dcausevic/datasets/kitti_608x192_vel_all/valid/608x192/tfrecords/',
+                           '/home/dcausevic/datasets/kitti_608x192_vel_all/val/608x192/tfrecords/',
                            'Path to the directory containing training tfrecords')
 
 # Less likely needed to change

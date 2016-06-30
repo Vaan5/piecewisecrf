@@ -18,7 +18,7 @@ All the scripts are well documented and for information about script arguments l
 ### Generating images
 The first step is to generate all the necessary files used for training and validation.
 
-1. Download the datasets ([Cityscapes](https://www.cityscapes-dataset.com/) or [KITTI](http://adas.cvc.uab.es/s2uad/)). For the Cityscapes dataset download the ground truth labels as well as left images. Extract the downloaded archives.
+1. Download the datasets ([Cityscapes](https://www.cityscapes-dataset.com/) or [KITTI](http://adas.cvc.uab.es/s2uad/)). For the Cityscapes dataset download the ground truth labels as well as left images. Extract the downloaded archives. For KITTI rename the valid folder to val.
 2. Run the `piecewisecrf/datasets/cityscapes/train_validation_split.py` in order to generate the validation dataset. For KITTI use `piecewisecrf/datasets/kitti/train_validation_split.py`.
 3. Configure `piecewisecrf/config/prefs.py` file. Set the `dataset_dir, save_dir, img_width, img_height, img_depth` flags
 4. Run the `piecewisecrf/datasets/cityscapes/prepare_dataset_files.py` in order to generate files necessary for tensorflow records generation as well as evaluation. For KITTI use `piecewisecrf/datasets/kitti/prepare_dataset_files.py`.
