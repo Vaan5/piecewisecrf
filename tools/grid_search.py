@@ -137,6 +137,7 @@ def grid_search(search_ranges, input_dir, unary_dir, labels_dir, temp_dir, exe, 
                         counter += 1
 
     results = ThreadPool(number_of_processes).map(evaluate_params, params)
+    return results
 
 
 if __name__ == '__main__':
