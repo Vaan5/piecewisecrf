@@ -78,7 +78,6 @@ def calculate_weights_binary(weights, labels_pairwise, decoding, num_classes):
 
     '''
     ret = np.zeros(labels_pairwise.shape, dtype=np.float32)
-    print(ret.shape)
     for i in range(ret.shape[0]):
         cidx1, cidx2 = decoding.get(labels_pairwise[i], (-1, -1))
         if cidx1 >= 0 and cidx1 < num_classes and cidx2 >= 0 and cidx2 < num_classes:
